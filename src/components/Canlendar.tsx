@@ -1,45 +1,79 @@
+// import { useCallback, useState } from 'react';
 
-import FullCalendar from '@fullcalendar/react';
-import interactionPlugin from "@fullcalendar/interaction";
-import { DateClickArg } from '@fullcalendar/interaction';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import { CssDimValue } from '@fullcalendar/core/index.js';
-import koLocale from '@fullcalendar/core/locales/ko';
+// import FullCalendar from '@fullcalendar/react';
+// import interactionPlugin from "@fullcalendar/interaction";
+// import { DateClickArg } from '@fullcalendar/interaction';
+// import dayGridPlugin from '@fullcalendar/daygrid';
+// import { CssDimValue, DateSelectArg, EventClickArg, EventContentArg } from '@fullcalendar/core/index.js';
+// import koLocale from '@fullcalendar/core/locales/ko';
 
-const Calendar: React.FC = () => {
-    const calenderHeight: CssDimValue = '100%';
+// import TodoDialog from './TOdoDialog';
 
-    const customButtonClickEvt = () => {
-        alert('일정등록')
-    };
-    
-    const dateClickEvt = (arg:DateClickArg) => {
-        alert(arg.dateStr);
-    };
+// const Calendar: React.FC = () => {
+//     const calenderHeight: CssDimValue = '100%';
+//     const [selectedDate, setSelectedDate] = useState<string>("");
+//     const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
 
-    return (
-        <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            editable={true}
-            height={calenderHeight}
-            locale={koLocale}
-            customButtons={{
-                addTodoButton: {
-                    text: '일정등록',
-                    click: customButtonClickEvt,
-                },
-            }}
-            headerToolbar={{
-                left: 'prev,next today addTodoButton',
-                center: 'title',
-                right: 'dayGridMonth,dayGridWeek,dayGridDay',
-            }}
-            dateClick={dateClickEvt}
-        />
-    )
+//     const toDoList: Array<any> = [
+//         {
+//             title: 'event1',
+//             start: '2024-04-08'
+//         },
+//         {
+//             title: 'event1',
+//             start: '2024-04-11',
+//             end: '2024-04-19',
+//             color: 'green'
+//         }
+//     ]
 
-    // headerToolbar={headerToolbarOptions} 이용해서 커스텀 컴포넌트 추가하기
-}
+//     const customButtonClickEvt = useCallback(() => {
+//         alert('일정등록')
+//     }, []);
 
-export default Calendar;
+//     const dateClickEvt = (arg: DateClickArg) => {
+//         setSelectedDate(arg.dateStr);
+//         alert(arg.dateStr);
+
+//         console.log(arg.dayEl);
+//     };
+
+//     const eventClickEvt = (arg: EventClickArg) => {
+//         arg.jsEvent.preventDefault();
+//         arg.view.calendar.unselect();
+//     };
+
+//     // const dateSelecting = (arg:DateSelectArg) => {
+//     //     setSelectedDate(`${arg.startStr} ~ ${arg.endStr}`);
+//     //     alert(`${arg.startStr} ~ ${arg.endStr}`);
+//     // }
+
+//     return (
+//         <FullCalendar
+//             plugins={[dayGridPlugin, interactionPlugin]}
+//             initialView="dayGridMonth"
+//             editable={true}
+//             height={calenderHeight}
+//             locale={koLocale}
+//             customButtons={{
+//                 addTodoButton: {
+//                     text: '일정등록',
+//                     click: customButtonClickEvt,
+//                 },
+//             }}
+//             headerToolbar={{
+//                 left: 'prev,next today addTodoButton',
+//                 center: 'title',
+//                 right: 'dayGridMonth,dayGridWeek,dayGridDay',
+//             }}
+//             dateClick={dateClickEvt}
+//             events={toDoList}
+//             eventClick={eventClickEvt}
+//         // selectable={true}
+//         // select={dateSelecting}
+//         />
+//     )
+
+// }
+
+// export default Calendar;
