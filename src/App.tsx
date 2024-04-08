@@ -46,10 +46,10 @@ function App() {
       setIsOpen(false);
     }
 
-    // const dateSelecting = (arg:DateSelectArg) => {
-    //     setSelectedDate(`${arg.startStr} ~ ${arg.endStr}`);
-    //     alert(`${arg.startStr} ~ ${arg.endStr}`);
-    // }
+    const dateSelecting = (arg:DateSelectArg) => {
+        setSelectedDate(`${arg.startStr} ~ ${arg.endStr}`);
+        setIsOpen(true);
+    }
 
   return (
     <>
@@ -75,8 +75,8 @@ function App() {
             dateClick={dateClickEvt}
             events={toDoList}
             eventClick={eventClickEvt}
-        // selectable={true}
-        // select={dateSelecting}
+            selectable={true}
+            select={dateSelecting}
         />
       </section>
     </>
