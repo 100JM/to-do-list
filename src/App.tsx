@@ -11,8 +11,8 @@ import TodoDialog from './components/TOdoDialog';
 
 function App() {
   const calenderHeight: CssDimValue = '100%';
-  const defaultStartDate = new Date().toISOString();
-
+  const defaultStartDate:string = new Date().toISOString();
+  
   const [selectedDate, setSelectedDate] = useState<{ startDate: string; endDate: string; }>({
     startDate: defaultStartDate,
     endDate: defaultStartDate
@@ -26,8 +26,8 @@ function App() {
     },
     {
       title: 'event1',
-      start: '2024-04-11',
-      end: '2024-04-19',
+      start: '2024-04-11T10:30:00',
+      end: '2024-04-19T11:30:00',
       color: 'green'
     }
   ]
@@ -46,7 +46,7 @@ function App() {
     })
 
     setIsOpen(true);
-    console.log(arg.dayEl);
+    console.log(selectedDate);
   };
 
   const eventClickEvt = (arg: EventClickArg) => {
@@ -71,7 +71,7 @@ function App() {
 
   return (
     <>
-      <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} />
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
