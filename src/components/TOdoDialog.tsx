@@ -46,12 +46,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         }
     }, [isOpen]);
 
-    const escKeyDown = (e: any) => {
-        if (e.key === 'Escape') {
-            closeTodoModal();
-        }
-    }
-
     const handleIsAllday = () => {
         setIsAllday(!isAllday);
     }
