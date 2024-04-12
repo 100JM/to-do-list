@@ -32,3 +32,9 @@ html, body, #root {
 .custom-input {
   margin-left: 8px !important;
 }
+
+@layer utilities {
+  .w-22 {
+    width: 5.7rem;
+  }
+}

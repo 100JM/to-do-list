@@ -28,7 +28,7 @@ function App() {
       title: 'event1',
       start: '2024-04-11T10:30:00',
       end: '2024-04-19T11:30:00',
-      color: 'green'
+      color: '#FA8072'
     }
   ]
 
