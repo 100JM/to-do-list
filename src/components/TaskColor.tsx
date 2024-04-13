@@ -11,7 +11,7 @@ interface TakeColorInterface {
 const TaskColor: React.FC<TakeColorInterface> = ({handleDraw, selectedColor, colorName}) => {
     return (
         <button type="button" className="flex justify-between items-center py-2 px-1 w-full hover:bg-stone-100" onClick={() => handleDraw(true)}>
-            <div style={{ color: selectedColor }}>
+            <div className={selectedColor}>
                 <FontAwesomeIcon icon={faPalette as IconProp} />
                 <span className="ml-2">{colorName}</span>
             </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
+import TaskColorButtons from './TaskColorButtons';
 
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -40,7 +41,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
-        selectedColor: '#3788d8',
+        selectedColor: 'color-wb',
         colorName: '워터 블루'
     });
 
@@ -171,14 +172,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     </DialogContentsDiv>
                     <DialogContentsDiv>
                         <TaskColor handleDraw={handleDraw} selectedColor={openColorBar.selectedColor} colorName={openColorBar.colorName} />
-                        <Drawer open={openColorBar.open} onClose={() => handleDraw(false)} anchor={"bottom"}>
-                            <div>test</div>
-                            <div>test</div>
-                            <div>test</div>
-                            <div>test</div>
-                            <div>test</div>
-                            <div>test</div>
-                            <div>test</div> {/*createPortal?*/}
+                        <Drawer open={openColorBar.open} onClose={() => handleDraw(false)} anchor={"bottom"} style={{zIndex: "9999"}}>
+                            <TaskColorButtons />
                         </Drawer>
                     </DialogContentsDiv>
                 </div>

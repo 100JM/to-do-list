@@ -37,4 +37,44 @@ html, body, #root {
   .w-22 {
     width: 5.7rem;
   }
+
+  .color-wb {
+    color: #3788d8;
+  }
+
+  .color-mg {
+    color: #98FB98;
+  }
+
+  .color-cr {
+    color: #FF7F50;
+  }
+
+  .color-lv {
+    color: #a0a0e8;
+  }
+
+  .color-gr {
+    color: #DAA520;
+  }
+
+  .color-sg {
+    color: #708090;
+  }
+
+  .color-sm {
+    color: #FA8072;
+  }
+
+  .color-tl {
+    color: #008080;
+  }
+
+  .color-ig {
+    color: #4B0082;
+  }
+
+  .color-cs {
+    color: #DC143C;
+  }
 }
