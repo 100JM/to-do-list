@@ -10,43 +10,43 @@ interface ColorListInterFace {
 // color 값으로 변경
 const COLOR_LIST: ColorListInterFace[] = [
     {
-        className: 'color-wb',
+        className: '#3788d8',
         colorName: '워터 블루'
     },
     {
-        className: 'color-mg',
+        className: '#73e473',
         colorName: '민트 그린'
     },
     {
-        className: 'color-cr',
+        className: '#FF7F50',
         colorName: '코랄'
     },
     {
-        className: 'color-lv',
+        className: '#a0a0e8',
         colorName: '라벤더'
     },
     {
-        className: 'color-gr',
+        className: '#DAA520',
         colorName: '골든 로드'
     },
     {
-        className: 'color-sg',
+        className: '#708090',
         colorName: '슬레이트 그레이'
     },
     {
-        className: 'color-sm',
+        className: '#FA8072',
         colorName: '살몬'
     },
     {
-        className: 'color-tl',
+        className: '#008080',
         colorName: '틸 그린'
     },
     {
-        className: 'color-ig',
+        className: '#4B0082',
         colorName: '인디고'
     },
     {
-        className: 'color-cs',
+        className: '#DC143C',
         colorName: '크림슨'
     },
 ]
@@ -62,7 +62,8 @@ const TaskColorButtons: React.FC<TaskColorButtonsInterface> = ({onClick, selecte
             {COLOR_LIST.map((color) => (
                 <div key={color.className} className={`hover:bg-slate-200 ${color.className === selectedColor ? 'bg-slate-200' : ''}`}>
                     <button 
-                        className={`w-full p-2 pl-4 border-b flex justify-start items-center ${color.className}`}
+                        className="w-full p-2 pl-4 border-b flex justify-start items-center"
+                        style={{color: color.className}}
                         onClick={() => onClick(false, color.className, color.colorName)}
                     >
                         <FontAwesomeIcon icon={faPalette as IconProp} />

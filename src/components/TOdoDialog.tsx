@@ -45,7 +45,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
-        selectedColor: 'color-wb',
+        selectedColor: '#3788d8',
         colorName: '워터 블루'
     });
 
@@ -106,10 +106,19 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     <DialogContentsDiv>
                         <div className="flex justify-between items-center my-1 px-1">
                             <div>
-                                <FontAwesomeIcon icon={faClockRotateLeft as IconProp} className={openColorBar.selectedColor} />
+                                <FontAwesomeIcon icon={faClockRotateLeft as IconProp} style={{color: openColorBar.selectedColor}} />
                                 <span className="ml-2">하루종일</span>
                             </div>
-                            <Switch color="primary" checked={isAllday} onChange={handleIsAllday} />
+                            <Switch 
+                                color="primary" 
+                                checked={isAllday} 
+                                onChange={handleIsAllday}
+                                sx={{
+                                    "& .MuiSwitch-thumb": {backgroundColor: openColorBar.selectedColor},
+                                    "& .MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                    "& .Mui-checked+.MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                }}
+                            />
                         </div>
                         <div className="flex justify-between items-center my-3 px-1">
                             <div>
@@ -129,7 +138,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "& .MuiInputBase-root": { borderRadius: "32px" },
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            }
+                                            },
+                                            "& fieldset": {borderColor: openColorBar.selectedColor}
                                         }}
                                     />
                                     {!isAllday && <TimePicker
@@ -142,7 +152,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "& .MuiInputBase-root": { borderRadius: "32px" },
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            }
+                                            },
+                                            "& fieldset": {borderColor: openColorBar.selectedColor}
                                         }}
                                     />}
                                 </LocalizationProvider>
@@ -166,7 +177,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "& .MuiInputBase-root": { borderRadius: "32px" },
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            }
+                                            },
+                                            "& fieldset": {borderColor: openColorBar.selectedColor}
                                         }}
                                     />
                                     {!isAllday && <TimePicker
@@ -179,7 +191,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "& .MuiInputBase-root": { borderRadius: "32px" },
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            }
+                                            },
+                                            "& fieldset": {borderColor: openColorBar.selectedColor}
                                         }}
                                     />}
                                 </LocalizationProvider>
@@ -189,10 +202,18 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     <DialogContentsDiv>
                         <div className="flex justify-between items-center my-1 px-1">
                             <div>
-                                <FontAwesomeIcon icon={faThumbTack as IconProp} className={openColorBar.selectedColor} />
+                                <FontAwesomeIcon icon={faThumbTack as IconProp} style={{color: openColorBar.selectedColor}} />
                                 <span className="ml-2">중요일정</span>
                             </div>
-                            <Switch color="primary" defaultChecked={false} />
+                            <Switch 
+                                color="primary" 
+                                defaultChecked={false} 
+                                sx={{
+                                    "& .MuiSwitch-thumb": {backgroundColor: openColorBar.selectedColor},
+                                    "& .MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                    "& .Mui-checked+.MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                }}
+                            />
                         </div>
                     </DialogContentsDiv>
                     <DialogContentsDiv>
@@ -214,7 +235,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             </DialogContent>
         </Dialog>
     );
-    // 글꼴 & 아이콘
+    // 글꼴 & datepicker ui
     // return createPortal(
     //     <dialog className="bg-white shadow-2xl rounded-lg p-6 w-11/12 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 lg:w-1/2" ref={dialogRef} onClose={closeTodoModal} onKeyDown={escKeyDown}>
     //         <div className="flex justify-between">
