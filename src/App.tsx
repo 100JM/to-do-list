@@ -72,7 +72,7 @@ function App() {
   return (
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} />}
-      <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm">
+      <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
