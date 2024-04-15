@@ -3,10 +3,11 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faPalette } from "@fortawesome/free-solid-svg-icons"
 
 interface ColorListInterFace {
-    className:string
+    className:string,
     colorName:string
 }
 
+// color 값으로 변경
 const COLOR_LIST: ColorListInterFace[] = [
     {
         className: 'color-wb',
@@ -50,12 +51,20 @@ const COLOR_LIST: ColorListInterFace[] = [
     },
 ]
 
-const TaskColorButtons: React.FC = () => {
+interface TaskColorButtonsInterface {
+    onClick: (newOpen:boolean, className:string, colorName:string) => void,
+    selectedColor: string
+}
+
+const TaskColorButtons: React.FC<TaskColorButtonsInterface> = ({onClick, selectedColor}) => {
     return (
         <>
             {COLOR_LIST.map((color) => (
-                <div key={color.className}>
-                    <button className={`w-full p-1 pl-4 border-b flex justify-start items-center ${color.className}`}>
+                <div key={color.className} className={`hover:bg-slate-200 ${color.className === selectedColor ? 'bg-slate-200' : ''}`}>
+                    <button 
+                        className={`w-full p-2 pl-4 border-b flex justify-start items-center ${color.className}`}
+                        onClick={() => onClick(false, color.className, color.colorName)}
+                    >
                         <FontAwesomeIcon icon={faPalette as IconProp} />
                         <span className="ml-2">{color.colorName}</span>
                     </button>
