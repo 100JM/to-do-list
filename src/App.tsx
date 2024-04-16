@@ -26,7 +26,12 @@ function App() {
     },
     {
       title: 'event1',
-      start: '2024-04-11T10:30:00',
+      start: '2024-04-10',
+      end: '2024-04-10',
+    },
+    {
+      title: 'event1',
+      start: '2024-04-11T15:00:00.000Z',
       end: '2024-04-19T11:30:00',
       color: '#FA8072'
     }
@@ -40,13 +45,15 @@ function App() {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.dateStr,
-        endDate: arg.dateStr
+        startDate: arg.date.toISOString(),
+        endDate: arg.date.toISOString()
       }
     })
 
     setIsOpen(true);
-    console.log(selectedDate);
+    // console.log(arg.allDay);
+    // console.log(arg.date.toISOString());
+    // console.log(arg.dateStr);
   };
 
   const eventClickEvt = (arg: EventClickArg) => {
@@ -62,16 +69,34 @@ function App() {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.startStr,
-        endDate: arg.endStr
+        startDate: arg.start.toISOString(),
+        endDate: arg.end.toISOString()
       }
     })
     setIsOpen(true);
   }
 
+  const setStartDate = (startDate:string) => {
+    setSelectedDate((prevDate) => {
+      return {
+        ...prevDate,
+        startDate: startDate,
+      }
+    })
+  };
+
+  const setEndDate = (endDate:string) => {
+    setSelectedDate((prevDate) => {
+      return {
+        ...prevDate,
+        endDate: endDate,
+      }
+    })
+  };
+
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} />}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
