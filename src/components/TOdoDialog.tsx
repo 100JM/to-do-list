@@ -18,6 +18,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
@@ -30,8 +31,8 @@ interface TodoDialogInterface {
         startDate: string,
         endDate: string,
     };
-    setStartDate: (startDate:string) => void;
-    setEndDate: (endDate:string) => void;
+    setStartDate: (startDate: string) => void;
+    setEndDate: (endDate: string) => void;
 }
 
 interface OpenColorBarInterface {
@@ -40,11 +41,19 @@ interface OpenColorBarInterface {
     colorName: string,
 }
 
+const koLocale: string = dayjs.locale('ko');
+
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate }) => {
     console.log(selectedDate);
-    const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute');
-    const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute');
 
+    // 이부분을 바꿔야함 -> selectedDate 기준에 시분을 붙히자
+    const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').toString();
+    const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').toString();
+    
+    const [selectedTime, setSelectedTime] = useState<{startTime:string, endTime:string}>({
+        startTime: defaultStartDateTime,
+        endTime: defaultEndDateTime
+    });
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
@@ -56,7 +65,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         setIsAllday((prev) => !prev)
     }
 
-    const handleDraw = (newOpen:boolean) => {
+    const handleDraw = (newOpen: boolean) => {
         setOpenColorBar((prevState) => {
             return {
                 ...prevState,
@@ -65,7 +74,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         });
     };
 
-    const handleTaskColor = (newOpen:boolean, className:string, colorName:string) => {
+    const handleTaskColor = (newOpen: boolean, className: string, colorName: string) => {
         setOpenColorBar((prevState) => {
             return {
                 ...prevState,
@@ -76,21 +85,31 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         })
     };
 
-    const handleStartDate = (date:Dayjs | null) => {
+    const handleStartDate = (date: Dayjs | null) => {
         if (date) {
-            const newDate = new Date(date.toISOString());
+            let formattedStartDate:string = '';
 
-            const formattedDate = `${newDate.getFullYear()}-${(newDate.getMonth() + 1).toString().padStart(2, '0')}-${newDate.getDate().toString().padStart(2, '0')}`;
-            setStartDate(formattedDate);
+            if(isAllday) {
+                formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+            }else {
+                formattedStartDate = date.toISOString();
+            }
+            
+            setStartDate(formattedStartDate);
         }
     };
 
-    const handleEndtDate = (date:Dayjs | null) => {
+    const handleEndtDate = (date: Dayjs | null) => {
         if (date) {
-            const newDate = new Date(date.toISOString());
-
-            const formattedDate = `${newDate.getFullYear()}-${(newDate.getMonth() + 1).toString().padStart(2, '0')}-${newDate.getDate().toString().padStart(2, '0')}`;
-            setEndDate(formattedDate);
+            let formattedEndDate:string = '';
+            
+            if(isAllday) {
+                formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+            }else {
+                formattedEndDate = date.toISOString();
+            }
+        
+            setEndDate(formattedEndDate);
         }
     };
 
@@ -102,10 +121,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             fullWidth={true}
         >
             <DialogTitle className="flex justify-between items-center">
-                <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{color: openColorBar.selectedColor}}>
+                <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
                     <DeleteIcon />
                 </IconButton>
-                <Button variant="text" sx={{color: openColorBar.selectedColor}}>저장</Button>
+                <Button variant="text" sx={{ color: openColorBar.selectedColor }}>저장</Button>
             </DialogTitle>
             <DialogContent>
                 <div className={`text-gray-700 mb-4`}>
@@ -115,17 +134,17 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     <DialogContentsDiv>
                         <div className="flex justify-between items-center my-1 px-1">
                             <div>
-                                <FontAwesomeIcon icon={faClockRotateLeft as IconProp} style={{color: openColorBar.selectedColor}} />
+                                <FontAwesomeIcon icon={faClockRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
                                 <span className="ml-2">하루종일</span>
                             </div>
-                            <Switch 
-                                color="primary" 
-                                checked={isAllday} 
+                            <Switch
+                                color="primary"
+                                checked={isAllday}
                                 onChange={handleIsAllday}
                                 sx={{
-                                    "& .MuiSwitch-thumb": {backgroundColor: openColorBar.selectedColor},
-                                    "& .MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
-                                    "& .Mui-checked+.MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                    "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
+                                    "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
+                                    "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                 }}
                             />
                         </div>
@@ -134,10 +153,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                 <span className="ml-5-5">시작일</span>
                             </div>
                             <div className="flex items-center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                     <DatePicker
                                         value={dayjs(selectedDate.startDate)}
-                                        onChange={(date) => {handleStartDate(date)}}
+                                        onChange={(date) => { handleStartDate(date) }}
                                         className="w-22 sm:w-48"
                                         showDaysOutsideCurrentMonth
                                         format="YYYY-MM-DD"
@@ -153,13 +172,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
                                             },
-                                            "& fieldset": {borderColor: openColorBar.selectedColor}
+                                            "& fieldset": { borderColor: openColorBar.selectedColor }
                                         }}
                                     />
                                     {!isAllday && <TimePicker
                                         className="w-22 sm:w-48 custom-input"
                                         format="H:mm:A"
-                                        value={defaultStartDateTime}
+                                        value={dayjs(selectedTime.startTime)}
+                                        onChange={(date) => { console.log(date?.toISOString()) }}
+                                        // onChange={(date) => { handleStartDate(date) }}
                                         desktopModeMediaQuery="@media (min-width: 640px)"
                                         sx={{
                                             "& input": { height: "18px" },
@@ -167,7 +188,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
                                             },
-                                            "& fieldset": {borderColor: openColorBar.selectedColor}
+                                            "& fieldset": { borderColor: openColorBar.selectedColor }
                                         }}
                                     />}
                                 </LocalizationProvider>
@@ -178,10 +199,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                 <span className="ml-5-5">종료일</span>
                             </div>
                             <div className="flex items-center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                     <DatePicker
                                         value={dayjs(selectedDate.endDate)}
-                                        onChange={(date) => {handleEndtDate(date)}}
+                                        onChange={(date) => { handleEndtDate(date) }}
                                         className="w-22 sm:w-48"
                                         showDaysOutsideCurrentMonth
                                         format="YYYY-MM-DD"
@@ -197,16 +218,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
                                             },
-                                            "& fieldset": {borderColor: openColorBar.selectedColor}
+                                            "& fieldset": { borderColor: openColorBar.selectedColor }
                                         }}
-                                        // shouldDisableDate={(day) => {
-                                        //     return 
-                                        // }}
                                     />
                                     {!isAllday && <TimePicker
                                         className="w-22 sm:w-48 custom-input"
                                         format="H:mm:A"
-                                        value={defaultEndDateTime}
+                                        value={dayjs(selectedTime.endTime)}
+                                        // onChange={(date) => { handleEndtDate(date) }}
                                         desktopModeMediaQuery="@media (min-width: 640px)"
                                         sx={{
                                             "& input": { height: "18px" },
@@ -214,7 +233,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             "@media (max-width: 640px)": {
                                                 "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
                                             },
-                                            "& fieldset": {borderColor: openColorBar.selectedColor}
+                                            "& fieldset": { borderColor: openColorBar.selectedColor }
                                         }}
                                     />}
                                 </LocalizationProvider>
@@ -224,30 +243,30 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     <DialogContentsDiv>
                         <div className="flex justify-between items-center my-1 px-1">
                             <div>
-                                <FontAwesomeIcon icon={faThumbTack as IconProp} style={{color: openColorBar.selectedColor}} />
+                                <FontAwesomeIcon icon={faThumbTack as IconProp} style={{ color: openColorBar.selectedColor }} />
                                 <span className="ml-2">중요일정</span>
                             </div>
-                            <Switch 
-                                color="primary" 
-                                defaultChecked={false} 
+                            <Switch
+                                color="primary"
+                                defaultChecked={false}
                                 sx={{
-                                    "& .MuiSwitch-thumb": {backgroundColor: openColorBar.selectedColor},
-                                    "& .MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
-                                    "& .Mui-checked+.MuiSwitch-track": {backgroundColor: openColorBar.selectedColor},
+                                    "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
+                                    "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
+                                    "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                 }}
                             />
                         </div>
                     </DialogContentsDiv>
                     <DialogContentsDiv>
                         <TaskColor handleDraw={handleDraw} selectedColor={openColorBar.selectedColor} colorName={openColorBar.colorName} />
-                        <Drawer 
-                            open={openColorBar.open} 
-                            onClose={() => handleDraw(false)} 
-                            anchor={"bottom"} 
-                            style={{zIndex: "9999"}} 
-                            sx={{"& .MuiDrawer-paperAnchorBottom" : { maxHeight: "50%"}}}
+                        <Drawer
+                            open={openColorBar.open}
+                            onClose={() => handleDraw(false)}
+                            anchor={"bottom"}
+                            style={{ zIndex: "9999" }}
+                            sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "50%" } }}
                         >
-                            <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor}/>
+                            <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
                         </Drawer>
                     </DialogContentsDiv>
                     <DialogContentsDiv>

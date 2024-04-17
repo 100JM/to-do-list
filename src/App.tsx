@@ -45,8 +45,8 @@ function App() {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.date.toISOString(),
-        endDate: arg.date.toISOString()
+        startDate: arg.dateStr,
+        endDate: arg.dateStr
       }
     })
 
@@ -69,8 +69,8 @@ function App() {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.start.toISOString(),
-        endDate: arg.end.toISOString()
+        startDate: arg.startStr,
+        endDate: arg.endStr
       }
     })
     setIsOpen(true);
