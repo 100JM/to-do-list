@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { LegacyRef, useEffect, useRef, useState } from 'react';
 
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
@@ -44,22 +44,22 @@ interface OpenColorBarInterface {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate }) => {
-    console.log(selectedDate);
-
-    // 이부분을 바꿔야함 -> selectedDate 기준에 시분을 붙히자
-    const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').toString();
-    const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').toString();
+    const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
+    const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
     
     const [selectedTime, setSelectedTime] = useState<{startTime:string, endTime:string}>({
         startTime: defaultStartDateTime,
         endTime: defaultEndDateTime
     });
+    console.log(selectedTime);
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
         selectedColor: '#3788d8',
         colorName: '워터 블루'
     });
+
+    const timeRef = useRef<HTMLDivElement | null>(null);
 
     const handleIsAllday = () => {
         setIsAllday((prev) => !prev)
@@ -113,6 +113,42 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         }
     };
 
+    const handleStartTime = (date: Dayjs | null) => {
+        if(date){
+            setSelectedTime((prevTime) => {
+                return {
+                    ...prevTime,
+                    startTime: dayjs(date as Dayjs).format('HH:mm')
+                }
+            })
+        }
+    };
+
+    const handleEndTime = (date: Dayjs | null) => {
+        if(date){
+            setSelectedTime((prevTime) => {
+                return {
+                    ...prevTime,
+                    endTime: dayjs(date as Dayjs).format('HH:mm')
+                }
+            })
+        }
+    };
+
+    const submitTask = () => {
+        const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
+
+        if(checkTimeInput){
+            if(checkTimeInput.classList.contains('Mui-error')){
+                alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
+                return;
+            }else{
+                
+            }
+        }
+    }
+    
+    
     return (
         <Dialog
             open={isOpen}
@@ -124,7 +160,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                 <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
                     <DeleteIcon />
                 </IconButton>
-                <Button variant="text" sx={{ color: openColorBar.selectedColor }}>저장</Button>
+                <Button variant="text" sx={{ color: openColorBar.selectedColor }} onClick={submitTask}>저장</Button>
             </DialogTitle>
             <DialogContent>
                 <div className={`text-gray-700 mb-4`}>
@@ -176,11 +212,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         }}
                                     />
                                     {!isAllday && <TimePicker
+                                        ref={timeRef}
                                         className="w-22 sm:w-48 custom-input"
                                         format="H:mm:A"
-                                        value={dayjs(selectedTime.startTime)}
-                                        onChange={(date) => { console.log(date?.toISOString()) }}
-                                        // onChange={(date) => { handleStartDate(date) }}
+                                        value={dayjs(selectedTime.startTime, 'HH:mm')}
+                                        onChange={(date) => { handleStartTime(date) }}
+                                        shouldDisableTime={time => {
+                                            return dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isAfter(dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${selectedTime.endTime}`));
+                                        }}
                                         desktopModeMediaQuery="@media (min-width: 640px)"
                                         sx={{
                                             "& input": { height: "18px" },
@@ -224,8 +263,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                     {!isAllday && <TimePicker
                                         className="w-22 sm:w-48 custom-input"
                                         format="H:mm:A"
-                                        value={dayjs(selectedTime.endTime)}
-                                        // onChange={(date) => { handleEndtDate(date) }}
+                                        value={dayjs(selectedTime.endTime, 'HH:mm')}
+                                        onChange={(date) => { handleEndTime(date)}}
+                                        shouldDisableTime={time => {
+                                            return dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isBefore(dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${selectedTime.startTime}`));
+                                        }}
                                         desktopModeMediaQuery="@media (min-width: 640px)"
                                         sx={{
                                             "& input": { height: "18px" },
