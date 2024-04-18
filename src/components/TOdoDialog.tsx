@@ -143,12 +143,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                 alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
                 return;
             }else{
-                
+
             }
         }
     }
     
-    
+    // handleStartDate & handleEndDate 수정 / datepicker ui
     return (
         <Dialog
             open={isOpen}
@@ -318,7 +318,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             </DialogContent>
         </Dialog>
     );
-    // date 유효성 check(time 분기처리 -> 따로 state를 사용하는것이 최선인가?) datepicker ui
 }
 
 export default TodoDialog;
