@@ -1,4 +1,4 @@
-import { LegacyRef, useEffect, useRef, useState } from 'react';
+import { Children, LegacyRef, useEffect, useRef, useState } from 'react';
 
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
@@ -44,14 +44,15 @@ interface OpenColorBarInterface {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate }) => {
+
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
-    
-    const [selectedTime, setSelectedTime] = useState<{startTime:string, endTime:string}>({
+
+    const [selectedTime, setSelectedTime] = useState<{ startTime: string, endTime: string }>({
         startTime: defaultStartDateTime,
         endTime: defaultEndDateTime
     });
-    console.log(selectedTime);
+
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
@@ -87,34 +88,38 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const handleStartDate = (date: Dayjs | null) => {
         if (date) {
-            let formattedStartDate:string = '';
+            let formattedStartDate: string = '';
 
-            if(isAllday) {
-                formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
-            }else {
-                formattedStartDate = date.toISOString();
-            }
-            
+            // if(isAllday) {
+            //     formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+            // }else {
+            //     formattedStartDate = `${dayjs(date as Dayjs).format(`YYYY-MM-DD`)}T${selectedTime.startTime}`;
+            // }
+
+            formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+
             setStartDate(formattedStartDate);
         }
     };
 
     const handleEndtDate = (date: Dayjs | null) => {
         if (date) {
-            let formattedEndDate:string = '';
-            
-            if(isAllday) {
-                formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
-            }else {
-                formattedEndDate = date.toISOString();
-            }
-        
+            let formattedEndDate: string = '';
+
+            // if(isAllday) {
+            //     formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+            // }else {
+            //     formattedEndDate = `${dayjs(date as Dayjs).format(`YYYY-MM-DD`)}T${selectedTime.endTime}`;
+            // }
+
+            formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+
             setEndDate(formattedEndDate);
         }
     };
 
     const handleStartTime = (date: Dayjs | null) => {
-        if(date){
+        if (date) {
             setSelectedTime((prevTime) => {
                 return {
                     ...prevTime,
@@ -125,7 +130,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     };
 
     const handleEndTime = (date: Dayjs | null) => {
-        if(date){
+        if (date) {
             setSelectedTime((prevTime) => {
                 return {
                     ...prevTime,
@@ -138,16 +143,30 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const submitTask = () => {
         const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
 
-        if(checkTimeInput){
-            if(checkTimeInput.classList.contains('Mui-error')){
+        if (checkTimeInput) {
+            if (checkTimeInput.classList.contains('Mui-error')) {
                 alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
                 return;
-            }else{
-
             }
         }
+
+        let selectStartDateValue: string;
+        let selectEndDateValue: string;
+
+        if (isAllday) {
+            selectStartDateValue = selectedDate.startDate;
+            selectEndDateValue = selectedDate.endDate;
+        } else {
+            selectStartDateValue = `${selectedDate.startDate}T${selectedTime.startTime}`;
+            selectEndDateValue = `${selectedDate.endDate}T${selectedTime.endTime}`;
+        }
+
+        setStartDate(selectStartDateValue);
+        setEndDate(selectEndDateValue);
+
+        closeTodoModal();
     }
-    
+
     // handleStartDate & handleEndDate 수정 / datepicker ui
     return (
         <Dialog
@@ -264,7 +283,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         className="w-22 sm:w-48 custom-input"
                                         format="H:mm:A"
                                         value={dayjs(selectedTime.endTime, 'HH:mm')}
-                                        onChange={(date) => { handleEndTime(date)}}
+                                        onChange={(date) => { handleEndTime(date) }}
                                         shouldDisableTime={time => {
                                             return dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isBefore(dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${selectedTime.startTime}`));
                                         }}

@@ -93,7 +93,7 @@ function App() {
       }
     })
   };
-
+  console.log(selectedDate);
   return (
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate}/>}
