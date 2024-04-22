@@ -33,6 +33,7 @@ interface TodoDialogInterface {
     };
     setStartDate: (startDate: string) => void;
     setEndDate: (endDate: string) => void;
+    addNewTodoList: (newToDo: object) => void;
 }
 
 interface OpenColorBarInterface {
@@ -41,10 +42,14 @@ interface OpenColorBarInterface {
     colorName: string,
 }
 
+interface ToDoValueRefs {
+    [key: string]: HTMLElement | null;
+}
+
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate }) => {
-
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList }) => {
+    
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -61,6 +66,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     });
 
     const timeRef = useRef<HTMLDivElement | null>(null);
+    const toDoValueRef = useRef<ToDoValueRefs>({});
 
     const handleIsAllday = () => {
         setIsAllday((prev) => !prev)
@@ -143,6 +149,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const submitTask = () => {
         const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
 
+        if(!(toDoValueRef.current.title as HTMLInputElement).value) {
+            alert('제목을 입력해주세요.');
+            (toDoValueRef.current.title as HTMLInputElement).focus();
+            return;
+        }
+
         if (checkTimeInput) {
             if (checkTimeInput.classList.contains('Mui-error')) {
                 alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
@@ -160,10 +172,19 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             selectStartDateValue = `${selectedDate.startDate}T${selectedTime.startTime}`;
             selectEndDateValue = `${selectedDate.endDate}T${selectedTime.endTime}`;
         }
-
-        setStartDate(selectStartDateValue);
-        setEndDate(selectEndDateValue);
-
+        
+        const newToDo:object = {
+            id: Math.random(),
+            title: (toDoValueRef.current.title as HTMLInputElement).value,
+            allDay: (toDoValueRef.current.allDay as HTMLInputElement).checked,
+            start: selectStartDateValue,
+            end: selectEndDateValue,
+            color: openColorBar.selectedColor,
+            description: (toDoValueRef.current.description as HTMLTextAreaElement).value
+        } ;
+        
+        addNewTodoList(newToDo);
+        
         closeTodoModal();
     }
 
@@ -184,7 +205,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             <DialogContent>
                 <div className={`text-gray-700 mb-4`}>
                     <DialogContentsDiv>
-                        <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" />
+                        <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" ref={(e) => {toDoValueRef.current['title'] = e}}/>
                     </DialogContentsDiv>
                     <DialogContentsDiv>
                         <div className="flex justify-between items-center my-1 px-1">
@@ -201,6 +222,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                     "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                     "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                 }}
+                                inputRef={(e) => {toDoValueRef.current['allDay'] = e}}
                             />
                         </div>
                         <div className="flex justify-between items-center my-3 px-1">
@@ -327,11 +349,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                             style={{ zIndex: "9999" }}
                             sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "50%" } }}
                         >
-                            <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
+                        <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
                         </Drawer>
                     </DialogContentsDiv>
                     <DialogContentsDiv>
-                        <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20"></textarea>
+                        <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => {toDoValueRef.current['description'] = e}}></textarea>
                     </DialogContentsDiv>
                 </div>
             </DialogContent>

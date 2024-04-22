@@ -19,23 +19,35 @@ function App() {
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const toDoList: Array<any> = [
-    {
-      title: 'event1',
-      start: '2024-04-08'
-    },
-    {
-      title: 'event1',
-      start: '2024-04-10',
-      end: '2024-04-10',
-    },
-    {
-      title: 'event1',
-      start: '2024-04-11T15:00:00.000Z',
-      end: '2024-04-19T11:30',
-      color: '#FA8072'
-    }
-  ]
+  const [toDoList , setToDoList] = useState<Array<any>>(
+    [
+      {
+        title: 'event1',
+        start: '2024-04-08'
+      },
+      {
+        title: 'event1',
+        start: '2024-04-10',
+        end: '2024-04-10',
+      },
+      {
+        title: 'event1',
+        start: '2024-04-10',
+        end: '2024-04-10',
+        color: '#FA8072'
+      },
+      {
+        title: 'event1',
+        start: '2024-04-11T09:00',
+        end: '2024-04-19T13:30',
+        color: '#FA8072'
+      }
+    ]
+  );
+
+  const addNewTodoList = (newToDo:object) => {
+    setToDoList((prevList) => [...prevList, newToDo]);
+  }
 
   const customButtonClickEvt = useCallback(() => {
     alert('일정등록')
@@ -51,9 +63,6 @@ function App() {
     })
 
     setIsOpen(true);
-    // console.log(arg.allDay);
-    // console.log(arg.date.toISOString());
-    // console.log(arg.dateStr);
   };
 
   const eventClickEvt = (arg: EventClickArg) => {
@@ -93,10 +102,10 @@ function App() {
       }
     })
   };
-  console.log(selectedDate);
+  
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate}/>}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate} addNewTodoList={addNewTodoList}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
