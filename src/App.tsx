@@ -70,9 +70,10 @@ function App() {
     arg.view.calendar.unselect();
   };
 
-  const closeTodoModal = () => {
+  
+  const closeTodoModal = useCallback(() => {
     setIsOpen(false);
-  }
+  }, []);
 
   const dateSelecting = (arg: DateSelectArg) => {
     setSelectedDate((prevDate) => {

@@ -96,12 +96,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         if (date) {
             let formattedStartDate: string = '';
 
-            // if(isAllday) {
-            //     formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
-            // }else {
-            //     formattedStartDate = `${dayjs(date as Dayjs).format(`YYYY-MM-DD`)}T${selectedTime.startTime}`;
-            // }
-
             formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
 
             setStartDate(formattedStartDate);
@@ -111,12 +105,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const handleEndtDate = (date: Dayjs | null) => {
         if (date) {
             let formattedEndDate: string = '';
-
-            // if(isAllday) {
-            //     formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
-            // }else {
-            //     formattedEndDate = `${dayjs(date as Dayjs).format(`YYYY-MM-DD`)}T${selectedTime.endTime}`;
-            // }
 
             formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
 
@@ -180,7 +168,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             start: selectStartDateValue,
             end: selectEndDateValue,
             color: openColorBar.selectedColor,
-            description: (toDoValueRef.current.description as HTMLTextAreaElement).value
+            description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
+            important: (toDoValueRef.current.important as HTMLInputElement).checked,
         } ;
         
         addNewTodoList(newToDo);
@@ -188,7 +177,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         closeTodoModal();
     }
 
-    // handleStartDate & handleEndDate 수정 / datepicker ui
     return (
         <Dialog
             open={isOpen}
@@ -337,6 +325,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                     "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                     "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                 }}
+                                inputRef={(e) => {toDoValueRef.current['important'] = e}}
                             />
                         </div>
                     </DialogContentsDiv>
