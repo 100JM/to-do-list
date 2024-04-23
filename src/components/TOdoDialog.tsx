@@ -3,9 +3,12 @@ import { Children, LegacyRef, useEffect, useRef, useState } from 'react';
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
 import TaskColorButtons from './TaskColorButtons';
+import TaskList from './TaskList';
 
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import Drawer from '@mui/material/Drawer';
@@ -22,7 +25,7 @@ import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClockRotateLeft, faThumbTack } from '@fortawesome/free-solid-svg-icons';
+import { faClockRotateLeft, faThumbTack, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
     isOpen: boolean;
@@ -34,6 +37,7 @@ interface TodoDialogInterface {
     setStartDate: (startDate: string) => void;
     setEndDate: (endDate: string) => void;
     addNewTodoList: (newToDo: object) => void;
+    selectedDateEventList:Array<any>;
 }
 
 interface OpenColorBarInterface {
@@ -48,8 +52,8 @@ interface ToDoValueRefs {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList }) => {
-    
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList, selectedDateEventList }) => {
+
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -58,6 +62,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         endTime: defaultEndDateTime
     });
 
+    const [isAddArea, setIsAddArea] = useState<boolean>(false);
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
@@ -137,7 +142,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     const submitTask = () => {
         const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
 
-        if(!(toDoValueRef.current.title as HTMLInputElement).value) {
+        if (!(toDoValueRef.current.title as HTMLInputElement).value) {
             alert('제목을 입력해주세요.');
             (toDoValueRef.current.title as HTMLInputElement).focus();
             return;
@@ -160,8 +165,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             selectStartDateValue = `${selectedDate.startDate}T${selectedTime.startTime}`;
             selectEndDateValue = `${selectedDate.endDate}T${selectedTime.endTime}`;
         }
-        
-        const newToDo:object = {
+
+        const newToDo: object = {
             id: Math.random(),
             title: (toDoValueRef.current.title as HTMLInputElement).value,
             allDay: (toDoValueRef.current.allDay as HTMLInputElement).checked,
@@ -170,11 +175,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             color: openColorBar.selectedColor,
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
-        } ;
-        
+        };
+
         addNewTodoList(newToDo);
-        
+
         closeTodoModal();
+    }
+
+    const handleAddArea = () => {
+        setIsAddArea(!isAddArea);
     }
 
     return (
@@ -184,168 +193,196 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             maxWidth="md"
             fullWidth={true}
         >
-            <DialogTitle className="flex justify-between items-center">
-                <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
-                    <DeleteIcon />
-                </IconButton>
-                <Button variant="text" sx={{ color: openColorBar.selectedColor }} onClick={submitTask}>저장</Button>
-            </DialogTitle>
-            <DialogContent>
-                <div className={`text-gray-700 mb-4`}>
-                    <DialogContentsDiv>
-                        <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" ref={(e) => {toDoValueRef.current['title'] = e}}/>
-                    </DialogContentsDiv>
-                    <DialogContentsDiv>
-                        <div className="flex justify-between items-center my-1 px-1">
-                            <div>
-                                <FontAwesomeIcon icon={faClockRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
-                                <span className="ml-2">하루종일</span>
-                            </div>
-                            <Switch
-                                color="primary"
-                                checked={isAllday}
-                                onChange={handleIsAllday}
-                                sx={{
-                                    "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
-                                    "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
-                                    "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
-                                }}
-                                inputRef={(e) => {toDoValueRef.current['allDay'] = e}}
-                            />
+            {!isAddArea &&
+                <>
+                    <DialogTitle className="flex justify-between items-center">
+                        <IconButton aria-label="close" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
+                            <CloseIcon />
+                        </IconButton>
+                        <IconButton aria-label="add" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor }}>
+                            <AddIcon />
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent>
+                        <div className="text-gray-700 mb-4">
+                            <DialogContentsDiv>
+                                    {!(selectedDateEventList.length > 0) && 
+                                        <div className="flex items-center justify-center min-h-80">
+                                            <span className="text-slate-500">등록된 일정이 없습니다.</span>
+                                        </div>
+                                    }
+                                    {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList}/>}
+                            </DialogContentsDiv>
                         </div>
-                        <div className="flex justify-between items-center my-3 px-1">
-                            <div>
-                                <span className="ml-5-5">시작일</span>
-                            </div>
-                            <div className="flex items-center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
-                                    <DatePicker
-                                        value={dayjs(selectedDate.startDate)}
-                                        onChange={(date) => { handleStartDate(date) }}
-                                        className="w-22 sm:w-48"
-                                        showDaysOutsideCurrentMonth
-                                        format="YYYY-MM-DD"
-                                        shouldDisableDate={day => {
-                                            return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isAfter(
-                                                selectedDate.endDate
-                                            );
-                                        }}
-                                        desktopModeMediaQuery="@media (min-width: 640px)"
+                    </DialogContent>
+                </>
+            }    
+            {isAddArea &&
+                <>
+                    <DialogTitle className="flex justify-between items-center">
+                        <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
+                            <DeleteIcon />
+                        </IconButton>
+                        <Button variant="text" sx={{ color: openColorBar.selectedColor }} onClick={submitTask}>저장</Button>
+                    </DialogTitle>
+                    <DialogContent>
+                        <div className="text-gray-700 mb-4">
+                            <DialogContentsDiv>
+                                <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" ref={(e) => { toDoValueRef.current['title'] = e }} />
+                            </DialogContentsDiv>
+                            <DialogContentsDiv>
+                                <div className="flex justify-between items-center my-1 px-1">
+                                    <div>
+                                        <FontAwesomeIcon icon={faClockRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                        <span className="ml-2">하루종일</span>
+                                    </div>
+                                    <Switch
+                                        color="primary"
+                                        checked={isAllday}
+                                        onChange={handleIsAllday}
                                         sx={{
-                                            "& input": { height: "18px" }, // width - 610 -> media
-                                            "& .MuiInputBase-root": { borderRadius: "32px" },
-                                            "@media (max-width: 640px)": {
-                                                "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            },
-                                            "& fieldset": { borderColor: openColorBar.selectedColor }
+                                            "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
+                                            "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
+                                            "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                         }}
+                                        inputRef={(e) => { toDoValueRef.current['allDay'] = e }}
                                     />
-                                    {!isAllday && <TimePicker
-                                        ref={timeRef}
-                                        className="w-22 sm:w-48 custom-input"
-                                        format="H:mm:A"
-                                        value={dayjs(selectedTime.startTime, 'HH:mm')}
-                                        onChange={(date) => { handleStartTime(date) }}
-                                        shouldDisableTime={time => {
-                                            return dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isAfter(dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${selectedTime.endTime}`));
-                                        }}
-                                        desktopModeMediaQuery="@media (min-width: 640px)"
+                                </div>
+                                <div className="flex justify-between items-center my-3 px-1">
+                                    <div>
+                                        <span className="ml-5-5">시작일</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
+                                            <DatePicker
+                                                value={dayjs(selectedDate.startDate)}
+                                                onChange={(date) => { handleStartDate(date) }}
+                                                className="w-22 sm:w-48"
+                                                showDaysOutsideCurrentMonth
+                                                format="YYYY-MM-DD"
+                                                shouldDisableDate={day => {
+                                                    return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isAfter(
+                                                        selectedDate.endDate
+                                                    );
+                                                }}
+                                                desktopModeMediaQuery="@media (min-width: 640px)"
+                                                sx={{
+                                                    "& input": { height: "18px" }, // width - 610 -> media
+                                                    "& .MuiInputBase-root": { borderRadius: "32px" },
+                                                    "@media (max-width: 640px)": {
+                                                        "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
+                                                    },
+                                                    "& fieldset": { borderColor: openColorBar.selectedColor }
+                                                }}
+                                            />
+                                            {!isAllday && <TimePicker
+                                                ref={timeRef}
+                                                className="w-22 sm:w-48 custom-input"
+                                                format="H:mm:A"
+                                                value={dayjs(selectedTime.startTime, 'HH:mm')}
+                                                onChange={(date) => { handleStartTime(date) }}
+                                                shouldDisableTime={time => {
+                                                    return dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isAfter(dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${selectedTime.endTime}`));
+                                                }}
+                                                desktopModeMediaQuery="@media (min-width: 640px)"
+                                                sx={{
+                                                    "& input": { height: "18px" },
+                                                    "& .MuiInputBase-root": { borderRadius: "32px" },
+                                                    "@media (max-width: 640px)": {
+                                                        "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
+                                                    },
+                                                    "& fieldset": { borderColor: openColorBar.selectedColor }
+                                                }}
+                                            />}
+                                        </LocalizationProvider>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center my-3 px-1">
+                                    <div>
+                                        <span className="ml-5-5">종료일</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
+                                            <DatePicker
+                                                value={dayjs(selectedDate.endDate)}
+                                                onChange={(date) => { handleEndtDate(date) }}
+                                                className="w-22 sm:w-48"
+                                                showDaysOutsideCurrentMonth
+                                                format="YYYY-MM-DD"
+                                                shouldDisableDate={day => {
+                                                    return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isBefore(
+                                                        selectedDate.startDate
+                                                    );
+                                                }}
+                                                desktopModeMediaQuery="@media (min-width: 640px)"
+                                                sx={{
+                                                    "& input": { height: "18px" },
+                                                    "& .MuiInputBase-root": { borderRadius: "32px" },
+                                                    "@media (max-width: 640px)": {
+                                                        "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
+                                                    },
+                                                    "& fieldset": { borderColor: openColorBar.selectedColor }
+                                                }}
+                                            />
+                                            {!isAllday && <TimePicker
+                                                className="w-22 sm:w-48 custom-input"
+                                                format="H:mm:A"
+                                                value={dayjs(selectedTime.endTime, 'HH:mm')}
+                                                onChange={(date) => { handleEndTime(date) }}
+                                                shouldDisableTime={time => {
+                                                    return dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isBefore(dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${selectedTime.startTime}`));
+                                                }}
+                                                desktopModeMediaQuery="@media (min-width: 640px)"
+                                                sx={{
+                                                    "& input": { height: "18px" },
+                                                    "& .MuiInputBase-root": { borderRadius: "32px" },
+                                                    "@media (max-width: 640px)": {
+                                                        "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
+                                                    },
+                                                    "& fieldset": { borderColor: openColorBar.selectedColor }
+                                                }}
+                                            />}
+                                        </LocalizationProvider>
+                                    </div>
+                                </div>
+                            </DialogContentsDiv>
+                            <DialogContentsDiv>
+                                <div className="flex justify-between items-center my-1 px-1">
+                                    <div>
+                                        <FontAwesomeIcon icon={faThumbTack as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                        <span className="ml-2">중요일정</span>
+                                    </div>
+                                    <Switch
+                                        color="primary"
+                                        defaultChecked={false}
                                         sx={{
-                                            "& input": { height: "18px" },
-                                            "& .MuiInputBase-root": { borderRadius: "32px" },
-                                            "@media (max-width: 640px)": {
-                                                "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            },
-                                            "& fieldset": { borderColor: openColorBar.selectedColor }
+                                            "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
+                                            "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
+                                            "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
                                         }}
-                                    />}
-                                </LocalizationProvider>
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center my-3 px-1">
-                            <div>
-                                <span className="ml-5-5">종료일</span>
-                            </div>
-                            <div className="flex items-center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
-                                    <DatePicker
-                                        value={dayjs(selectedDate.endDate)}
-                                        onChange={(date) => { handleEndtDate(date) }}
-                                        className="w-22 sm:w-48"
-                                        showDaysOutsideCurrentMonth
-                                        format="YYYY-MM-DD"
-                                        shouldDisableDate={day => {
-                                            return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isBefore(
-                                                selectedDate.startDate
-                                            );
-                                        }}
-                                        desktopModeMediaQuery="@media (min-width: 640px)"
-                                        sx={{
-                                            "& input": { height: "18px" },
-                                            "& .MuiInputBase-root": { borderRadius: "32px" },
-                                            "@media (max-width: 640px)": {
-                                                "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            },
-                                            "& fieldset": { borderColor: openColorBar.selectedColor }
-                                        }}
+                                        inputRef={(e) => { toDoValueRef.current['important'] = e }}
                                     />
-                                    {!isAllday && <TimePicker
-                                        className="w-22 sm:w-48 custom-input"
-                                        format="H:mm:A"
-                                        value={dayjs(selectedTime.endTime, 'HH:mm')}
-                                        onChange={(date) => { handleEndTime(date) }}
-                                        shouldDisableTime={time => {
-                                            return dayjs(`${dayjs(selectedDate.endDate).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isBefore(dayjs(`${dayjs(selectedDate.startDate).format('YYYY-MM-DD')}T${selectedTime.startTime}`));
-                                        }}
-                                        desktopModeMediaQuery="@media (min-width: 640px)"
-                                        sx={{
-                                            "& input": { height: "18px" },
-                                            "& .MuiInputBase-root": { borderRadius: "32px" },
-                                            "@media (max-width: 640px)": {
-                                                "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
-                                            },
-                                            "& fieldset": { borderColor: openColorBar.selectedColor }
-                                        }}
-                                    />}
-                                </LocalizationProvider>
-                            </div>
+                                </div>
+                            </DialogContentsDiv>
+                            <DialogContentsDiv>
+                                <TaskColor handleDraw={handleDraw} selectedColor={openColorBar.selectedColor} colorName={openColorBar.colorName} />
+                                <Drawer
+                                    open={openColorBar.open}
+                                    onClose={() => handleDraw(false)}
+                                    anchor={"bottom"}
+                                    style={{ zIndex: "9999" }}
+                                    sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "50%" } }}
+                                >
+                                    <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
+                                </Drawer>
+                            </DialogContentsDiv>
+                            <DialogContentsDiv>
+                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }}></textarea>
+                            </DialogContentsDiv>
                         </div>
-                    </DialogContentsDiv>
-                    <DialogContentsDiv>
-                        <div className="flex justify-between items-center my-1 px-1">
-                            <div>
-                                <FontAwesomeIcon icon={faThumbTack as IconProp} style={{ color: openColorBar.selectedColor }} />
-                                <span className="ml-2">중요일정</span>
-                            </div>
-                            <Switch
-                                color="primary"
-                                defaultChecked={false}
-                                sx={{
-                                    "& .MuiSwitch-thumb": { backgroundColor: openColorBar.selectedColor },
-                                    "& .MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
-                                    "& .Mui-checked+.MuiSwitch-track": { backgroundColor: openColorBar.selectedColor },
-                                }}
-                                inputRef={(e) => {toDoValueRef.current['important'] = e}}
-                            />
-                        </div>
-                    </DialogContentsDiv>
-                    <DialogContentsDiv>
-                        <TaskColor handleDraw={handleDraw} selectedColor={openColorBar.selectedColor} colorName={openColorBar.colorName} />
-                        <Drawer
-                            open={openColorBar.open}
-                            onClose={() => handleDraw(false)}
-                            anchor={"bottom"}
-                            style={{ zIndex: "9999" }}
-                            sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "50%" } }}
-                        >
-                        <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
-                        </Drawer>
-                    </DialogContentsDiv>
-                    <DialogContentsDiv>
-                        <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => {toDoValueRef.current['description'] = e}}></textarea>
-                    </DialogContentsDiv>
-                </div>
-            </DialogContent>
+                    </DialogContent>
+                </>
+            }
         </Dialog>
     );
 }
