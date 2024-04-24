@@ -7,8 +7,6 @@ import TaskList from './TaskList';
 
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import Drawer from '@mui/material/Drawer';
@@ -25,7 +23,7 @@ import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClockRotateLeft, faThumbTack, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
     isOpen: boolean;
@@ -37,7 +35,7 @@ interface TodoDialogInterface {
     setStartDate: (startDate: string) => void;
     setEndDate: (endDate: string) => void;
     addNewTodoList: (newToDo: object) => void;
-    selectedDateEventList:Array<any>;
+    selectedDateEventList: Array<any>;
 }
 
 interface OpenColorBarInterface {
@@ -160,7 +158,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
         if (isAllday) {
             selectStartDateValue = selectedDate.startDate;
-            selectEndDateValue = selectedDate.endDate;
+            selectEndDateValue = dayjs(dayjs(selectedDate.endDate).add(1, 'day')).format('YYYY-MM-DD');
         } else {
             selectStartDateValue = `${selectedDate.startDate}T${selectedTime.startTime}`;
             selectEndDateValue = `${selectedDate.endDate}T${selectedTime.endTime}`;
@@ -175,6 +173,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             color: openColorBar.selectedColor,
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
+            display: 'block'
         };
 
         addNewTodoList(newToDo);
@@ -196,27 +195,30 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {!isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        <IconButton aria-label="close" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
-                            <CloseIcon />
-                        </IconButton>
-                        <IconButton aria-label="add" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor }}>
-                            <AddIcon />
-                        </IconButton>
+                        <span className="text-sm font-semibold" style={{ color: "#1a252f" }}>{dayjs(selectedDate.startDate).format('YYYY년 MM월 DD일 dddd')}</span>
+                        <div>
+                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={closeTodoModal}>
+                                <FontAwesomeIcon icon={faCircleXmark as IconProp} />
+                            </button>
+                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={handleAddArea}>
+                                <FontAwesomeIcon icon={faCirclePlus as IconProp} />
+                            </button>
+                        </div>
                     </DialogTitle>
                     <DialogContent>
                         <div className="text-gray-700 mb-4">
                             <DialogContentsDiv>
-                                    {!(selectedDateEventList.length > 0) && 
-                                        <div className="flex items-center justify-center min-h-80">
-                                            <span className="text-slate-500">등록된 일정이 없습니다.</span>
-                                        </div>
-                                    }
-                                    {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList}/>}
+                                {!(selectedDateEventList.length > 0) &&
+                                    <div className="flex items-center justify-center min-h-80">
+                                        <span className="text-slate-500">등록된 일정이 없습니다.</span>
+                                    </div>
+                                }
+                                {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList} />}
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>
                 </>
-            }    
+            }
             {isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">

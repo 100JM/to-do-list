@@ -4,13 +4,12 @@ import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
 import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CssDimValue, DateSelectArg, EventApi, EventClickArg, EventContentArg } from '@fullcalendar/core/index.js';
+import { CssDimValue, DateSelectArg, EventApi, EventClickArg } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
 
 import TodoDialog from './components/TOdoDialog';
-import { compareByFieldSpecs } from '@fullcalendar/core/internal';
 
 function App() {
   const calenderHeight: CssDimValue = '100%';
@@ -29,28 +28,37 @@ function App() {
         id: 1,
         title: 'event1',
         start: '2024-04-08',
-        color: '#3788d8'
+        end: '2024-04-10',
+        color: '#3788d8',
+        allDay: true,
+        display: "block"
       },
       {
         id: 2,
         title: 'event2',
-        start: '2024-04-10',
-        end: '2024-04-10',
-        color: '#3788d8'
+        start: '2024-04-10T09:00',
+        end: '2024-04-10T10:00',
+        color: '#3788d8',
+        allDay: false,
+        display: "block"
       },
       {
         id: 3,
-        title: 'event3',
+        title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
         start: '2024-04-10',
-        end: '2024-04-10',
-        color: '#FA8072'
+        end: '2024-04-11',
+        color: '#FA8072',
+        allDay: true,
+        display: "block"
       },
       {
         id: 4,
         title: 'event4',
         start: '2024-04-11T09:00',
         end: '2024-04-19T13:30',
-        color: '#FA8072'
+        color: '#FA8072',
+        allDay: false,
+        display: "block"
       }
     ]
   );
@@ -73,12 +81,11 @@ function App() {
 
   const dateClickEvt = (arg: DateClickArg) => {
     const selectedDateEvt = arg.view.calendar.getEvents().filter((event:EventApi) => {
-      if(event.endStr) {
+      if(!event.allDay) {
         return dayjs(event.startStr).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr <= dayjs(event.endStr).format('YYYY-MM-DD');
       }else {
-        return dayjs(event.startStr).format('YYYY-MM-DD') == arg.dateStr && arg.dateStr;
+        return dayjs(event.startStr).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr < dayjs(event.endStr).format('YYYY-MM-DD');
       }
-      
     })
     
     setSelectedDateEventList(selectedDateEvt);
@@ -95,8 +102,10 @@ function App() {
   };
 
   const eventClickEvt = (arg: EventClickArg) => {
+    arg.jsEvent.stopPropagation();
     arg.jsEvent.preventDefault();
-    arg.view.calendar.unselect();
+
+    // dateClick 함수를 실행? -> dateClick 함수에서 타입 체크해서 분기처리?
   };
 
   
@@ -156,9 +165,11 @@ function App() {
           }}
           dateClick={dateClickEvt}
           events={toDoList}
-          // eventClick={eventClickEvt}
+          eventClick={eventClickEvt}
           selectable={true}
           select={dateSelecting}
+          displayEventTime={false}
+          timeZone='UTC'
         />
       </section>
     </>
