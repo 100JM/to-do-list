@@ -4,20 +4,39 @@ import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
 import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CssDimValue, DateSelectArg, EventApi, EventClickArg } from '@fullcalendar/core/index.js';
+import { CssDimValue, DateSelectArg, DateSpanApi, EventApi, EventClickArg } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
 
 import TodoDialog from './components/TOdoDialog';
 
+interface selectedDateInterface {
+  id: string; 
+  title: string;
+  allDay: boolean;
+  startDate: string; 
+  endDate: string;
+  color: string;
+  description: string;
+  important: boolean;
+  display: string;
+}
+
 function App() {
   const calenderHeight: CssDimValue = '100%';
   const defaultStartDate:string = new Date().toISOString();
   
-  const [selectedDate, setSelectedDate] = useState<{ startDate: string; endDate: string; }>({
+  const [selectedDate, setSelectedDate] = useState<selectedDateInterface>({
+    id: '',
+    title: '',
+    allDay: true,
     startDate: defaultStartDate,
-    endDate: defaultStartDate
+    endDate: defaultStartDate,
+    color: '',
+    description: '',
+    important: false,
+    display: 'block'
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
@@ -25,7 +44,7 @@ function App() {
   const [toDoList , setToDoList] = useState<Array<any>>(
     [
       {
-        id: 1,
+        id: '1',
         title: 'event1',
         start: '2024-04-08',
         end: '2024-04-10',
@@ -34,7 +53,7 @@ function App() {
         display: "block"
       },
       {
-        id: 2,
+        id: '2',
         title: 'event2',
         start: '2024-04-10T09:00',
         end: '2024-04-10T10:00',
@@ -43,7 +62,7 @@ function App() {
         display: "block"
       },
       {
-        id: 3,
+        id: '3',
         title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
         start: '2024-04-10',
         end: '2024-04-11',
@@ -52,7 +71,7 @@ function App() {
         display: "block"
       },
       {
-        id: 4,
+        id: '4',
         title: 'event4',
         start: '2024-04-11T09:00',
         end: '2024-04-19T13:30',
@@ -105,7 +124,7 @@ function App() {
     arg.jsEvent.stopPropagation();
     arg.jsEvent.preventDefault();
 
-    // dateClick 함수를 실행? -> dateClick 함수에서 타입 체크해서 분기처리?
+    console.log(arg.event.toPlainObject());
   };
 
   
@@ -113,16 +132,19 @@ function App() {
     setIsOpen(false);
   }, []);
 
-  const dateSelecting = (arg: DateSelectArg) => {
+  const getSelectedEventInfo = (id:string) => {
+    const selectedTodo = toDoList.find((t) => {
+      return t.id === id;
+    });
+
+
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.startStr,
-        endDate: arg.endStr
+        ...selectedTodo
       }
     })
-    setIsOpen(true);
-  }
+  };
 
   const setStartDate = (startDate:string) => {
     setSelectedDate((prevDate) => {
@@ -144,12 +166,12 @@ function App() {
   
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList}/>}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
-          editable={true}
+          editable={false}
           height={calenderHeight}
           locale={koLocale}
           customButtons={{
@@ -165,9 +187,9 @@ function App() {
           }}
           dateClick={dateClickEvt}
           events={toDoList}
-          eventClick={eventClickEvt}
-          selectable={true}
-          select={dateSelecting}
+          // eventClick={eventClickEvt}
+          // selectable={true}
+          // select={dateSelecting}
           displayEventTime={false}
           timeZone='UTC'
         />

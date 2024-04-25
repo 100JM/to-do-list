@@ -17,6 +17,14 @@ html, body, #root {
   cursor: pointer;
 }
 
+.fc-daygrid-day-frame {
+  z-index: 0;
+}
+
+.fc .fc-daygrid-event {
+  z-index: -1;
+}
+
 @media (max-width : 540px) {
   .fc-header-toolbar {
     font-size: 13px;

@@ -36,6 +36,7 @@ interface TodoDialogInterface {
     setEndDate: (endDate: string) => void;
     addNewTodoList: (newToDo: object) => void;
     selectedDateEventList: Array<any>;
+    getSelectedEventInfo: (id:string) => void;
 }
 
 interface OpenColorBarInterface {
@@ -50,8 +51,8 @@ interface ToDoValueRefs {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList, selectedDateEventList }) => {
-
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList, selectedDateEventList, getSelectedEventInfo }) => {
+    console.log(selectedDate);
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -185,6 +186,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         setIsAddArea(!isAddArea);
     }
 
+    const handleUpdateTask = (taskId:string) => {
+        setIsAddArea(!isAddArea);
+
+        getSelectedEventInfo(taskId);
+    }
+    
+    // 기본값을 selectedDate 속성으로 전부 교체하기 -> 이벤트항목을 클릭시 해당 이벤트항목 정보 표출(startDate -> start, endDate -> end로 수정 필요) & 수정버튼 분기
     return (
         <Dialog
             open={isOpen}
@@ -213,7 +221,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         <span className="text-slate-500">등록된 일정이 없습니다.</span>
                                     </div>
                                 }
-                                {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList} />}
+                                {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList} handleUpdateTask={handleUpdateTask}/>}
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>
