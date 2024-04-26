@@ -12,12 +12,13 @@ import dayjs from 'dayjs';
 import TodoDialog from './components/TOdoDialog';
 
 interface selectedDateInterface {
-  id: string; 
+  id: string;
   title: string;
   allDay: boolean;
-  startDate: string; 
-  endDate: string;
+  start: string;
+  end: string;
   color: string;
+  colorName: string;
   description: string;
   important: boolean;
   display: string;
@@ -25,15 +26,16 @@ interface selectedDateInterface {
 
 function App() {
   const calenderHeight: CssDimValue = '100%';
-  const defaultStartDate:string = new Date().toISOString();
-  
+  const defaultStartDate: string = new Date().toISOString();
+
   const [selectedDate, setSelectedDate] = useState<selectedDateInterface>({
     id: '',
     title: '',
     allDay: true,
-    startDate: defaultStartDate,
-    endDate: defaultStartDate,
-    color: '',
+    start: defaultStartDate,
+    end: defaultStartDate,
+    color: '#3788d8',
+    colorName: '워터블루',
     description: '',
     important: false,
     display: 'block'
@@ -41,15 +43,17 @@ function App() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
 
-  const [toDoList , setToDoList] = useState<Array<any>>(
+  const [toDoList, setToDoList] = useState<Array<any>>(
     [
       {
         id: '1',
         title: 'event1',
-        start: '2024-04-08',
-        end: '2024-04-10',
+        start: '2024-04-08T09:00',
+        end: '2024-04-09T18:00',
         color: '#3788d8',
-        allDay: true,
+        colorName: '워터블루',
+        allDay: false,
+        important: false,
         display: "block"
       },
       {
@@ -58,7 +62,9 @@ function App() {
         start: '2024-04-10T09:00',
         end: '2024-04-10T10:00',
         color: '#3788d8',
+        colorName: '워터블루',
         allDay: false,
+        important: true,
         display: "block"
       },
       {
@@ -67,7 +73,9 @@ function App() {
         start: '2024-04-10',
         end: '2024-04-11',
         color: '#FA8072',
+        colorName: '살몬',
         allDay: true,
+        important: false,
         display: "block"
       },
       {
@@ -76,13 +84,15 @@ function App() {
         start: '2024-04-11T09:00',
         end: '2024-04-19T13:30',
         color: '#FA8072',
+        colorName: '살몬',
         allDay: false,
+        important: false,
         display: "block"
       }
     ]
   );
 
-  const addNewTodoList = (newToDo:object) => {
+  const addNewTodoList = (newToDo: object) => {
     setToDoList((prevList) => [...prevList, newToDo]);
   }
 
@@ -90,8 +100,8 @@ function App() {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: dayjs().format('YYYY-MM-DD'),
-        endDate: dayjs().format('YYYY-MM-DD')
+        start: dayjs().format('YYYY-MM-DD'),
+        end: dayjs().format('YYYY-MM-DD')
       }
     })
 
@@ -99,21 +109,29 @@ function App() {
   }, []);
 
   const dateClickEvt = (arg: DateClickArg) => {
-    const selectedDateEvt = arg.view.calendar.getEvents().filter((event:EventApi) => {
-      if(!event.allDay) {
-        return dayjs(event.startStr).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr <= dayjs(event.endStr).format('YYYY-MM-DD');
-      }else {
-        return dayjs(event.startStr).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr < dayjs(event.endStr).format('YYYY-MM-DD');
+    const selectedDateEvt = arg.view.calendar.getEvents().filter((event: EventApi) => {
+      if (!event.allDay) {
+        return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr <= dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
+      } else {
+        return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr < dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
       }
     })
-    
+
     setSelectedDateEventList(selectedDateEvt);
 
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: arg.dateStr,
-        endDate: arg.dateStr
+        id: '',
+        title: '',
+        allDay: true,
+        start: arg.dateStr,
+        end: arg.dateStr,
+        color: '#3788d8',
+        colorName: '워터블루',
+        description: '',
+        important: false,
+        display: 'block'
       }
     })
 
@@ -127,16 +145,15 @@ function App() {
     console.log(arg.event.toPlainObject());
   };
 
-  
+
   const closeTodoModal = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  const getSelectedEventInfo = (id:string) => {
+  const getSelectedEventInfo = (id: string) => {
     const selectedTodo = toDoList.find((t) => {
       return t.id === id;
     });
-
 
     setSelectedDate((prevDate) => {
       return {
@@ -146,24 +163,24 @@ function App() {
     })
   };
 
-  const setStartDate = (startDate:string) => {
+  const setStartDate = (startDate: string) => {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        startDate: startDate,
+        start: startDate,
       }
     })
   };
 
-  const setEndDate = (endDate:string) => {
+  const setEndDate = (endDate: string) => {
     setSelectedDate((prevDate) => {
       return {
         ...prevDate,
-        endDate: endDate,
+        end: endDate,
       }
     })
   };
-  
+
   return (
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} />}
