@@ -40,11 +40,10 @@ interface TodoDialogInterface {
         important: boolean,
         display: string,
     };
-    setStartDate: (startDate: string) => void;
-    setEndDate: (endDate: string) => void;
     addNewTodoList: (newToDo: object) => void;
     selectedDateEventList: Array<any>;
     getSelectedEventInfo: (id: string) => void;
+    setTaskInfo: (name:string, value:string | boolean) => void;
 }
 
 interface OpenColorBarInterface {
@@ -59,8 +58,8 @@ interface ToDoValueRefs {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, setStartDate, setEndDate, addNewTodoList, selectedDateEventList, getSelectedEventInfo }) => {
-    
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, selectedDateEventList, getSelectedEventInfo, setTaskInfo }) => {
+    // 수정 기능 & 뒤로가기? & 유효성 체크 css 추가하기
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -89,7 +88,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
         setIsAllday(selectedDate.allDay);
 
-    }, [selectedDate]);
+    }, [selectedDate.id]);
 
     const handleIsAllday = () => {
         setIsAllday((prev) => !prev)
@@ -115,23 +114,23 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         })
     };
 
-    const handleStartDate = (date: Dayjs | null) => {
-        if (date) {
-            let formattedStartDate: string = '';
+    // const handleStartDate = (date: Dayjs | null) => {
+    //     if (date) {
+    //         let formattedStartDate: string = '';
 
-            formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
+    //         formattedStartDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
 
-            setStartDate(formattedStartDate);
-        }
-    };
+    //         setStartDate(formattedStartDate);
+    //     }
+    // };
 
-    const handleEndtDate = (date: Dayjs | null) => {
+    const handletDate = (name:string, date: Dayjs | null) => {
         if (date) {
             let formattedEndDate: string = '';
 
             formattedEndDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
 
-            setEndDate(formattedEndDate);
+            setTaskInfo(name, formattedEndDate);
         }
     };
 
@@ -211,7 +210,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
         getSelectedEventInfo(taskId);
     }
-    // allDay 일때 종료 날짜 value -1 되는 부분 수정 필요함 -> value 삼항연산자 다시 고민해보기 ? 처음 랜더링될때 한번만 적용, 그후론 새로 랜더링 될따만 적용하는법 찾아보기 -> useEffect에 추가?
+    
     return (
         <Dialog
             open={isOpen}
@@ -285,7 +284,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                             <DatePicker
                                                 value={dayjs(selectedDate.start)}
-                                                onChange={(date) => { handleStartDate(date) }}
+                                                onChange={(date) => { handletDate('start', date) }}
                                                 className="w-22 sm:w-48"
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
@@ -333,14 +332,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                     <div className="flex items-center">
                                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                             <DatePicker
-                                                value={(isAllday ? (selectedDate.start.split('T')[0] === selectedDate.end.split('T')[0] ? dayjs(selectedDate.end) : dayjs(selectedDate.end).add(-1, 'day')) : dayjs(selectedDate.end))}
-                                                onChange={(date) => { handleEndtDate(date) }}
+                                                defaultValue={(selectedDate.allDay ? (selectedDate.start.split('T')[0] === selectedDate.end.split('T')[0] ? dayjs(selectedDate.end) : dayjs(selectedDate.end).add(-1, 'day')) : dayjs(selectedDate.end))}
+                                                onChange={(date) => { handletDate('end', date) }}
                                                 className="w-22 sm:w-48"
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
                                                 shouldDisableDate={day => {
                                                     return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isBefore(
-                                                        (isAllday ? (selectedDate.start.split('T')[0] === selectedDate.end.split('T')[0] ?  dayjs(selectedDate.start).add(-1, 'day') : dayjs(selectedDate.start)) : dayjs(selectedDate.start).add(-1, 'day'))
+                                                        // (selectedDate.allDay ? (selectedDate.start.split('T')[0] === selectedDate.end.split('T')[0] ?  dayjs(selectedDate.start).add(-1, 'day') : dayjs(selectedDate.start)) : dayjs(selectedDate.start).add(-1, 'day'))
+                                                        dayjs(selectedDate.start).format(`YYYY-MM-DD`)
                                                     );
                                                 }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
@@ -406,7 +406,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                 </Drawer>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
-                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }}></textarea>
+                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" value={selectedDate.description} onChange={(e) => {setTaskInfo(e.target.name, e.target.value)}}></textarea>
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>

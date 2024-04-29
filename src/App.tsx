@@ -9,7 +9,7 @@ import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
 
-import TodoDialog from './components/TOdoDialog';
+import TodoDialog from './components/TaskDialog';
 
 interface selectedDateInterface {
   id: string;
@@ -163,27 +163,36 @@ function App() {
     })
   };
 
-  const setStartDate = (startDate: string) => {
-    setSelectedDate((prevDate) => {
-      return {
-        ...prevDate,
-        start: startDate,
-      }
-    })
-  };
+  // const setStartDate = (startDate: string) => {
+  //   setSelectedDate((prevDate) => {
+  //     return {
+  //       ...prevDate,
+  //       start: startDate,
+  //     }
+  //   })
+  // };
 
-  const setEndDate = (endDate: string) => {
-    setSelectedDate((prevDate) => {
+  // const setEndDate = (endDate: string) => {
+  //   setSelectedDate((prevDate) => {
+  //     return {
+  //       ...prevDate,
+  //       end: endDate,
+  //     }
+  //   })
+  // };
+
+  const setTaskInfo = (name:string, value:string | boolean) => {
+    setSelectedDate((prevInfo) => {
       return {
-        ...prevDate,
-        end: endDate,
+        ...prevInfo,
+        [name]: value
       }
     })
   };
 
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} setStartDate={setStartDate} setEndDate={setEndDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} />}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
