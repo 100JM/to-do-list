@@ -25,6 +25,11 @@ html, body, #root {
   z-index: -1;
 }
 
+.Mui-error {
+  color: #ef3b27 !important;
+  background-color: #fa807257;
+}
+
 @media (max-width : 540px) {
   .fc-header-toolbar {
     font-size: 13px;
