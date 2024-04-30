@@ -6,8 +6,7 @@ import TaskColorButtons from './TaskColorButtons';
 import TaskList from './TaskList';
 
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Button from '@mui/material/Button';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Switch from '@mui/material/Switch';
 import Drawer from '@mui/material/Drawer';
 
@@ -23,7 +22,7 @@ import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
     isOpen: boolean;
@@ -43,7 +42,7 @@ interface TodoDialogInterface {
     addNewTodoList: (newToDo: object) => void;
     selectedDateEventList: Array<any>;
     getSelectedEventInfo: (id: string) => void;
-    setTaskInfo: (name:string, value:string | boolean) => void;
+    setTaskInfo: (name: string, value: string | boolean) => void;
 }
 
 interface OpenColorBarInterface {
@@ -59,7 +58,8 @@ interface ToDoValueRefs {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, selectedDateEventList, getSelectedEventInfo, setTaskInfo }) => {
-    // 수정 기능 & 뒤로가기? & 유효성 체크 css 추가하기
+    // 수정 기능 & 뒤로가기? -> state 변경이 안돼서 초기화가 안되는 오류 발생 (handleIsAllday) -> selectedDate와 selectedEventDate로 상태 분기?
+    
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -78,7 +78,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const timeRef = useRef<HTMLDivElement | null>(null);
     const toDoValueRef = useRef<ToDoValueRefs>({});
-
+    console.log(isAddArea);
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
@@ -88,10 +88,20 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
         setIsAllday(selectedDate.allDay);
 
+        if (selectedDate.id && !selectedDate.allDay) {
+            setSelectedTime((prevTime) => {
+                return {
+                    ...prevTime,
+                    startTime: selectedDate.start.split('T')[1],
+                    endTime: selectedDate.end.split('T')[1]
+                }
+            })
+        }
+
     }, [selectedDate.id]);
 
     const handleIsAllday = () => {
-        setIsAllday((prev) => !prev)
+        setIsAllday((prev) => !prev);
     }
 
     const handleDraw = (newOpen: boolean) => {
@@ -124,7 +134,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     //     }
     // };
 
-    const handletDate = (name:string, date: Dayjs | null) => {
+    const handletDate = (name: string, date: Dayjs | null) => {
         if (date) {
             let formattedEndDate: string = '';
 
@@ -210,7 +220,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
         getSelectedEventInfo(taskId);
     }
-    
+
     return (
         <Dialog
             open={isOpen}
@@ -248,15 +258,28 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor }}>
-                            <DeleteIcon />
+                        <IconButton aria-label="delete" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
+                            <ArrowBackIcon />
                         </IconButton>
-                        <Button variant="text" sx={{ color: openColorBar.selectedColor }} onClick={submitTask}>저장</Button>
+                        <div className='p-1'>
+                            <button className="p-2">
+                                <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} />
+                            </button>
+                            {selectedDate.id ?
+                                <button className="p-2">
+                                    <FontAwesomeIcon icon={faPenToSquare as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                </button>
+                                :
+                                <button className="p-2">
+                                    <FontAwesomeIcon icon={faCircleCheck as IconProp} style={{ color: openColorBar.selectedColor }} onClick={submitTask} />
+                                </button>
+                            }
+                        </div>
                     </DialogTitle>
                     <DialogContent>
                         <div className="text-gray-700 mb-4">
                             <DialogContentsDiv>
-                                <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" defaultValue={selectedDate.title}  ref={(e) => { toDoValueRef.current['title'] = e }} />
+                                <input type="text" placeholder="제목" name="title" className="outline-none w-full px-1" defaultValue={selectedDate.title} ref={(e) => { toDoValueRef.current['title'] = e }} />
                             </DialogContentsDiv>
                             <DialogContentsDiv>
                                 <div className="flex justify-between items-center my-1 px-1">
@@ -406,7 +429,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                 </Drawer>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
-                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" value={selectedDate.description} onChange={(e) => {setTaskInfo(e.target.name, e.target.value)}}></textarea>
+                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" value={selectedDate.description} onChange={(e) => { setTaskInfo(e.target.name, e.target.value) }}></textarea>
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>
