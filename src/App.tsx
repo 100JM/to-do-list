@@ -42,14 +42,26 @@ function App() {
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
+  const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<selectedDateInterface>({
+    id: '',
+    title: '',
+    allDay: true,
+    start: defaultStartDate,
+    end: defaultStartDate,
+    color: '#3788d8',
+    colorName: '워터블루',
+    description: '',
+    important: false,
+    display: 'block'
+  });
 
   const [toDoList, setToDoList] = useState<Array<any>>(
     [
       {
         id: '1',
         title: 'event1',
-        start: '2024-04-08T09:00',
-        end: '2024-04-09T18:00',
+        start: '2024-05-08T09:00',
+        end: '2024-05-09T18:00',
         color: '#3788d8',
         colorName: '워터블루',
         allDay: false,
@@ -59,8 +71,8 @@ function App() {
       {
         id: '2',
         title: 'event2',
-        start: '2024-04-10T09:00',
-        end: '2024-04-10T10:00',
+        start: '2024-05-10T09:00',
+        end: '2024-05-10T10:00',
         color: '#3788d8',
         colorName: '워터블루',
         allDay: false,
@@ -70,8 +82,8 @@ function App() {
       {
         id: '3',
         title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
-        start: '2024-04-10',
-        end: '2024-04-11',
+        start: '2024-05-10',
+        end: '2024-05-11',
         color: '#FA8072',
         colorName: '살몬',
         allDay: true,
@@ -81,8 +93,8 @@ function App() {
       {
         id: '4',
         title: 'event4',
-        start: '2024-04-11T09:00',
-        end: '2024-04-19T13:30',
+        start: '2024-05-11T09:00',
+        end: '2024-05-19T13:30',
         color: '#FA8072',
         colorName: '살몬',
         allDay: false,
@@ -138,14 +150,6 @@ function App() {
     setIsOpen(true);
   };
 
-  const eventClickEvt = (arg: EventClickArg) => {
-    arg.jsEvent.stopPropagation();
-    arg.jsEvent.preventDefault();
-
-    console.log(arg.event.toPlainObject());
-  };
-
-
   const closeTodoModal = useCallback(() => {
     setIsOpen(false);
   }, []);
@@ -155,7 +159,7 @@ function App() {
       return t.id === id;
     });
 
-    setSelectedDate((prevDate) => {
+    setSelectedDateEventInfo((prevDate) => {
       return {
         ...prevDate,
         ...selectedTodo
@@ -163,36 +167,43 @@ function App() {
     })
   };
 
-  // const setStartDate = (startDate: string) => {
-  //   setSelectedDate((prevDate) => {
-  //     return {
-  //       ...prevDate,
-  //       start: startDate,
-  //     }
-  //   })
-  // };
-
-  // const setEndDate = (endDate: string) => {
-  //   setSelectedDate((prevDate) => {
-  //     return {
-  //       ...prevDate,
-  //       end: endDate,
-  //     }
-  //   })
-  // };
-
-  const setTaskInfo = (name:string, value:string | boolean) => {
+  const setTaskInfo = (name: string, value: string | boolean) => {
     setSelectedDate((prevInfo) => {
       return {
         ...prevInfo,
         [name]: value
       }
-    })
+    });
+
+    setSelectedDateEventInfo((prevInfo) => {
+      return {
+        ...prevInfo,
+        [name]: value
+      }
+    });
+  };
+
+  const setSelectedEventInfoDefault = () => {
+      setSelectedDateEventInfo((prev) => {
+        return {
+          ...prev,
+          id: '',
+          title: '',
+          allDay: true,
+          start: defaultStartDate,
+          end: defaultStartDate,
+          color: '#3788d8',
+          colorName: '워터블루',
+          description: '',
+          important: false,
+          display: 'block'
+        }
+      });
   };
 
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} />}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
@@ -213,9 +224,6 @@ function App() {
           }}
           dateClick={dateClickEvt}
           events={toDoList}
-          // eventClick={eventClickEvt}
-          // selectable={true}
-          // select={dateSelecting}
           displayEventTime={false}
           timeZone='UTC'
         />
