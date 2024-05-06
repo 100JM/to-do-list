@@ -108,6 +108,19 @@ function App() {
     setToDoList((prevList) => [...prevList, newToDo]);
   }
 
+  const updateTaskInfo = (taskInfo:any) => {
+    setToDoList(prevList => prevList.map(i => {
+      if(i.id === taskInfo.id) {
+        return {
+          ...i,
+          ...taskInfo
+        };
+      }
+
+      return i;
+    }))
+  };
+
   const customButtonClickEvt = useCallback(() => {
     setSelectedDate((prevDate) => {
       return {
@@ -203,7 +216,7 @@ function App() {
 
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault}/>}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}

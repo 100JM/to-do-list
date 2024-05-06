@@ -40,6 +40,7 @@ interface TodoDialogInterface {
         display: string,
     };
     addNewTodoList: (newToDo: object) => void;
+    updateTaskInfo: (taskInfo:object) => void;
     selectedDateEventList: Array<any>;
     getSelectedEventInfo: (id: string) => void;
     setTaskInfo: (name: string, value: string | boolean) => void;
@@ -83,8 +84,8 @@ interface DateData {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault }) => {
-    // 수정 기능
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault }) => {
+    // timePicker 오전에서 오후로 변경시 오전 선택이 사라지는 오류 -> pc모드에서만 발생
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -143,7 +144,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const handleIsAllday = () => {
         setIsAllday((prev) => !prev);
-    }
+    };
 
     const handleDraw = (newOpen: boolean) => {
         setOpenColorBar((prevState) => {
@@ -240,20 +241,66 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         addNewTodoList(newToDo);
 
         closeTodoModal();
-    }
+    };
+
+    const updateTask = () => {
+        const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
+
+        if (!(toDoValueRef.current.title as HTMLInputElement).value) {
+            alert('제목을 입력해주세요.');
+            (toDoValueRef.current.title as HTMLInputElement).focus();
+            return;
+        }
+
+        if (checkTimeInput) {
+            if (checkTimeInput.classList.contains('Mui-error')) {
+                alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
+                return;
+            }
+        }
+        
+        let updatedStartDateValue: string;
+        let updatedEndDateValue: string;
+
+        if (isAllday) {
+            updatedStartDateValue = selectedDate.start;
+            updatedEndDateValue = dayjs(dayjs(selectedDate.end).add(1, 'day')).format('YYYY-MM-DD');
+        } else {
+            updatedStartDateValue = `${selectedDate.start}T${selectedTime.startTime}`;
+            updatedEndDateValue = `${selectedDate.end}T${selectedTime.endTime}`;
+        }
+
+        const updatedToDo: object = {
+            id: selectedDateEventInfo.id,
+            title: (toDoValueRef.current.title as HTMLInputElement).value,
+            allDay: (toDoValueRef.current.allDay as HTMLInputElement).checked,
+            start: updatedStartDateValue,
+            end: updatedEndDateValue,
+            color: openColorBar.selectedColor,
+            colorName: openColorBar.colorName,
+            description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
+            important: (toDoValueRef.current.important as HTMLInputElement).checked,
+            display: 'block'
+        };
+
+        updateTaskInfo(updatedToDo);
+        setSelectedEventInfoDefault();
+
+        closeTodoModal();
+    };
 
     const handleAddArea = () => {
         setIsAddArea(!isAddArea);
 
         setSelectedEventInfoDefault();
-    }
+    };
 
     const handleUpdateTask = (taskId: string) => {
         setIsAddArea(!isAddArea);
 
         getSelectedEventInfo(taskId);
-    }
-    console.log(selectedDateEventInfo);
+    };
+
     return (
         <Dialog
             open={isOpen}
@@ -302,7 +349,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} />
                                     </button>
                                     <button className="p-2">
-                                        <FontAwesomeIcon icon={faPenToSquare as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                        <FontAwesomeIcon icon={faPenToSquare as IconProp} style={{ color: openColorBar.selectedColor }} onClick={updateTask}/>
                                     </button>
                                 </>
                                 :
