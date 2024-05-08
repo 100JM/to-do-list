@@ -4,6 +4,7 @@ import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
 import TaskColorButtons from './TaskColorButtons';
 import TaskList from './TaskList';
+import CustomAlert from './CustomAlert';
 
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -41,6 +42,7 @@ interface TodoDialogInterface {
     };
     addNewTodoList: (newToDo: object) => void;
     updateTaskInfo: (taskInfo:object) => void;
+    deleteTaskInfo: (taskId:string) => void;
     selectedDateEventList: Array<any>;
     getSelectedEventInfo: (id: string) => void;
     setTaskInfo: (name: string, value: string | boolean) => void;
@@ -57,6 +59,12 @@ interface TodoDialogInterface {
         display: string,
     };
     setSelectedEventInfoDefault: () => void;
+    handleShowAlert: (isShow:boolean, alertText:string, alertType: 'error' | 'warning' | 'info' | 'success') => void;
+    showAlert: {
+        isShow: boolean,
+        alertText: string,
+        alertType: 'error' | 'warning' | 'info' | 'success'
+    };
 }
 
 interface OpenColorBarInterface {
@@ -84,8 +92,8 @@ interface DateData {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault }) => {
-    
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert }) => {
+    // 일정 삭제 전 confirm 추가
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -201,14 +209,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
 
         if (!(toDoValueRef.current.title as HTMLInputElement).value) {
-            alert('제목을 입력해주세요.');
+            handleShowAlert(true, '제목을 입력해주세요.', 'warning');
             (toDoValueRef.current.title as HTMLInputElement).focus();
             return;
         }
 
         if (checkTimeInput) {
             if (checkTimeInput.classList.contains('Mui-error')) {
-                alert('시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.');
+                handleShowAlert(true, '시작시간이 종료시간보다 이후거나 종료시간이 시작시간보다 이전일 수 없습니다.', 'error');
                 return;
             }
         }
@@ -240,6 +248,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         addNewTodoList(newToDo);
 
         closeTodoModal();
+
+        handleShowAlert(true, '일정이 등록되었습니다.', 'success');
     };
 
     const updateTask = () => {
@@ -286,7 +296,17 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         setSelectedEventInfoDefault();
 
         closeTodoModal();
+
+        handleShowAlert(true, '일정이 수정되었습니다.', 'success');
     };
+
+    const deleteTask = (id:string) => {
+        deleteTaskInfo(id);
+
+        closeTodoModal();
+
+        handleShowAlert(true, '일정이 삭제되었습니다.', 'success');
+    }
 
     const handleAddArea = () => {
         setIsAddArea(!isAddArea);
@@ -345,7 +365,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                             {selectedDateEventInfo.id ?
                                 <>
                                     <button className="p-2">
-                                        <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                        <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} onClick={() => deleteTask(selectedDateEventInfo.id)}/>
                                     </button>
                                     <button className="p-2">
                                         <FontAwesomeIcon icon={faPenToSquare as IconProp} style={{ color: openColorBar.selectedColor }} onClick={updateTask}/>
@@ -517,6 +537,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                     </DialogContent>
                 </>
             }
+            <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert}/>
         </Dialog>
     );
 }

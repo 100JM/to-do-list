@@ -4,14 +4,15 @@ import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
 import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CssDimValue, DateSelectArg, DateSpanApi, EventApi, EventClickArg } from '@fullcalendar/core/index.js';
+import { CssDimValue, EventApi } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
 
 import TodoDialog from './components/TaskDialog';
+import CustomAlert from './components/CustomAlert';
 
-interface selectedDateInterface {
+interface SelectedDateInterface {
   id: string;
   title: string;
   allDay: boolean;
@@ -24,11 +25,17 @@ interface selectedDateInterface {
   display: string;
 }
 
+interface CustomAlertInterface {
+  isShow: boolean;
+  alertText: string;
+  alertType: 'error' | 'warning' | 'info' | 'success';
+}
+
 function App() {
   const calenderHeight: CssDimValue = '100%';
   const defaultStartDate: string = new Date().toISOString();
 
-  const [selectedDate, setSelectedDate] = useState<selectedDateInterface>({
+  const [selectedDate, setSelectedDate] = useState<SelectedDateInterface>({
     id: '',
     title: '',
     allDay: true,
@@ -41,8 +48,13 @@ function App() {
     display: 'block'
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
+    isShow: false,
+    alertText: '',
+    alertType: 'success'
+  });
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
-  const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<selectedDateInterface>({
+  const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<SelectedDateInterface>({
     id: '',
     title: '',
     allDay: true,
@@ -118,8 +130,14 @@ function App() {
       }
 
       return i;
-    }))
+    }));
   };
+
+  const deleteTaskInfo = (taskId:string) => {
+    setToDoList(prevList => prevList.filter((i) => {
+      return i.id !== taskId;
+    }));
+  }
 
   const customButtonClickEvt = useCallback(() => {
     setSelectedDate((prevDate) => {
@@ -214,9 +232,20 @@ function App() {
       });
   };
 
+  const handleShowAlert = (isShow:boolean, alertText:string, alertType: 'error' | 'warning' | 'info' | 'success') => {
+    setShowAlert((prev) => {
+      return {
+        ...prev,
+        isShow: isShow,
+        alertText: alertText,
+        alertType: alertType
+      }
+    });
+  }
+
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault}/>}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
@@ -240,6 +269,7 @@ function App() {
           displayEventTime={false}
           timeZone='UTC'
         />
+        <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert}/>
       </section>
     </>
   )
