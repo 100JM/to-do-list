@@ -301,11 +301,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     };
 
     const deleteTask = (id:string) => {
-        deleteTaskInfo(id);
+        if(confirm('해당 일정이 완전히 삭제됩니다.')) {
+            deleteTaskInfo(id);
 
-        closeTodoModal();
-
-        handleShowAlert(true, '일정이 삭제되었습니다.', 'success');
+            closeTodoModal();
+            
+            handleShowAlert(true, '일정이 삭제되었습니다.', 'success');
+        }else {
+            return;
+        }
     }
 
     const handleAddArea = () => {
