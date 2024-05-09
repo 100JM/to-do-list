@@ -93,7 +93,7 @@ interface DateData {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert }) => {
-    // 일정 삭제 전 confirm 추가
+    
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 

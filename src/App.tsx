@@ -8,6 +8,10 @@ import { CssDimValue, EventApi } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import { CSSTransition } from 'react-transition-group';
+import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
@@ -53,6 +57,7 @@ function App() {
     alertText: '',
     alertType: 'success'
   });
+  const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
   const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<SelectedDateInterface>({
     id: '',
@@ -120,9 +125,9 @@ function App() {
     setToDoList((prevList) => [...prevList, newToDo]);
   }
 
-  const updateTaskInfo = (taskInfo:any) => {
+  const updateTaskInfo = (taskInfo: any) => {
     setToDoList(prevList => prevList.map(i => {
-      if(i.id === taskInfo.id) {
+      if (i.id === taskInfo.id) {
         return {
           ...i,
           ...taskInfo
@@ -133,7 +138,7 @@ function App() {
     }));
   };
 
-  const deleteTaskInfo = (taskId:string) => {
+  const deleteTaskInfo = (taskId: string) => {
     setToDoList(prevList => prevList.filter((i) => {
       return i.id !== taskId;
     }));
@@ -150,6 +155,10 @@ function App() {
 
     setIsOpen(true);
   }, []);
+
+  const searchButtonClickEvt = (isShow: boolean) => {
+    setShowSearchForm(isShow);
+  };
 
   const dateClickEvt = (arg: DateClickArg) => {
     const selectedDateEvt = arg.view.calendar.getEvents().filter((event: EventApi) => {
@@ -215,24 +224,24 @@ function App() {
   };
 
   const setSelectedEventInfoDefault = () => {
-      setSelectedDateEventInfo((prev) => {
-        return {
-          ...prev,
-          id: '',
-          title: '',
-          allDay: true,
-          start: defaultStartDate,
-          end: defaultStartDate,
-          color: '#3788d8',
-          colorName: '워터블루',
-          description: '',
-          important: false,
-          display: 'block'
-        }
-      });
+    setSelectedDateEventInfo((prev) => {
+      return {
+        ...prev,
+        id: '',
+        title: '',
+        allDay: true,
+        start: defaultStartDate,
+        end: defaultStartDate,
+        color: '#3788d8',
+        colorName: '워터블루',
+        description: '',
+        important: false,
+        display: 'block'
+      }
+    });
   };
 
-  const handleShowAlert = (isShow:boolean, alertText:string, alertType: 'error' | 'warning' | 'info' | 'success') => {
+  const handleShowAlert = (isShow: boolean, alertText: string, alertType: 'error' | 'warning' | 'info' | 'success') => {
     setShowAlert((prev) => {
       return {
         ...prev,
@@ -247,29 +256,62 @@ function App() {
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          editable={false}
-          height={calenderHeight}
-          locale={koLocale}
-          customButtons={{
-            addTodoButton: {
-              text: '일정등록',
-              click: customButtonClickEvt,
-            },
-          }}
-          headerToolbar={{
-            left: 'prev,next today addTodoButton',
-            center: 'title',
-            right: 'dayGridMonth,dayGridWeek,dayGridDay',
-          }}
-          dateClick={dateClickEvt}
-          events={toDoList}
-          displayEventTime={false}
-          timeZone='UTC'
-        />
-        <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert}/>
+        <CSSTransition
+          in={!showSearchForm}
+          timeout={300}
+          classNames="slide"
+          unmountOnExit
+        >
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            editable={false}
+            height={calenderHeight}
+            locale={koLocale}
+            customButtons={{
+              addTodoButton: {
+                text: '중요일정',
+                click: customButtonClickEvt,
+              },
+              searchButton: {
+                icon: 'bi bi-search',
+                click: () => { searchButtonClickEvt(true) },
+              },
+            }}
+            headerToolbar={{
+              left: 'prev,next today addTodoButton',
+              center: 'title',
+              right: 'searchButton',
+            }}
+            dateClick={dateClickEvt}
+            events={toDoList}
+            displayEventTime={false}
+            timeZone='UTC'
+          />
+        </CSSTransition>
+        <CSSTransition
+          in={showSearchForm}
+          timeout={300}
+          classNames="slide"
+          unmountOnExit
+        >
+          <div className="h-full w-full p-4">
+            <div className="w-full h-10 flex items-center justify-between pb-2">
+              <ArrowBackIcon  onClick={() => searchButtonClickEvt(false)} sx={{cursor: "pointer"}}/>
+              <span className="text-center flex-grow mr-6 text-lg">검색</span>
+            </div>
+            <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
+              <SearchIcon />
+              <input className="h-full w-full p-2 outline-none" placeholder="키워드" />
+            </div>
+            <div className="w-full" style={{height: "calc(100% - 5.55rem)"}}>
+              <div className="w-full h-full flex justify-center items-center text-gray-400">
+                <span>키워드를 입력하세요.</span>
+              </div>
+            </div>
+          </div>
+        </CSSTransition>
+        <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert} />
       </section>
     </>
   )

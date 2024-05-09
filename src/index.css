@@ -12,6 +12,12 @@ html, body, #root {
   padding-right: 1em;
 }
 
+.fc-searchButton-button {
+  background-color: transparent !important;
+  border: none !important;
+  color: #2c3e50 !important;
+}
+
 .fc-day:hover {
   background-color: aliceblue;
   cursor: pointer;
@@ -95,3 +101,22 @@ html, body, #root {
     color: #DC143C;
   }
 }
+
+.slide-enter {
+  transform: translateX(-100%);
+}
+
+.slide-enter-active {
+  transform: translateX(0%);
+  transition: transform 300ms ease-in-out;
+}
+
+.slide-exit {
+  transform: translateX(0%);
+}
+
+.slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+

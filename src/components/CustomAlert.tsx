@@ -33,7 +33,7 @@ const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAler
     return (
         <Snackbar
             open={showAlert.isShow}
-            autoHideDuration={3000}
+            autoHideDuration={5000}
             onClose={handleClose}
             anchorOrigin={{
                 vertical: 'top',
