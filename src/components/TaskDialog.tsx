@@ -334,7 +334,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {!isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        <span className="text-sm font-semibold" style={{ color: "#1a252f" }}>{dayjs(selectedDate.start).format('YYYY년 MM월 DD일 dddd')}</span>
+                        <span className="text-sm font-semibold" style={{ color: "#1a252f" }}>{dayjs(selectedDate.start).format('YYYY년 MM월 DD일 dddd')}</span> {/* 이부분도 수정해야함 날짜 변경시 같이 변경됨 별개의 state를 둬야할듯?*/}
                         <div>
                             <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={closeTodoModal}>
                                 <FontAwesomeIcon icon={faCircleXmark as IconProp} />
