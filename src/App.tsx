@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -38,6 +38,7 @@ interface CustomAlertInterface {
 function App() {
   const calenderHeight: CssDimValue = '100%';
   const defaultStartDate: string = new Date().toISOString();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedDate, setSelectedDate] = useState<SelectedDateInterface>({
     id: '',
@@ -94,6 +95,7 @@ function App() {
         colorName: '워터블루',
         allDay: false,
         important: true,
+        description: '테스트입니다.',
         display: "block"
       },
       {
@@ -105,6 +107,7 @@ function App() {
         colorName: '살몬',
         allDay: true,
         important: false,
+        description: '조정 작업 완료',
         display: "block"
       },
       {
@@ -121,6 +124,8 @@ function App() {
     ]
   );
 
+  const [searchedToDoList, setSearchedToDoList] = useState<Array<any>>([]);
+
   const addNewTodoList = (newToDo: object) => {
     setToDoList((prevList) => [...prevList, newToDo]);
   }
@@ -128,10 +133,7 @@ function App() {
   const updateTaskInfo = (taskInfo: any) => {
     setToDoList(prevList => prevList.map(i => {
       if (i.id === taskInfo.id) {
-        return {
-          ...i,
-          ...taskInfo
-        };
+        return taskInfo;
       }
 
       return i;
@@ -250,8 +252,28 @@ function App() {
         alertType: alertType
       }
     });
-  }
+  };
 
+  const searchToDoEvt = (keyWord: string) => {
+    keyWord = keyWord.replace(/\s/g, '');
+
+    const searchResult = toDoList.filter((t) => {
+      if (keyWord) {
+        if (t.title?.replace(/\s/g, '').includes(keyWord) || t.description?.replace(/\s/g, '').includes(keyWord)) {
+          return t;
+        }
+      }
+    });
+
+    setSearchedToDoList(searchResult);
+  };
+
+  const searchResultClickEvt = (id:string) => {
+    console.log(id);
+    // setIsOpen(true);
+    // getSelectedEventInfo(id);
+  };
+  console.log(toDoList);
   return (
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} />}
@@ -297,17 +319,42 @@ function App() {
         >
           <div className="h-full w-full p-4">
             <div className="w-full h-10 flex items-center justify-between pb-2">
-              <ArrowBackIcon  onClick={() => searchButtonClickEvt(false)} sx={{cursor: "pointer"}}/>
+              <ArrowBackIcon onClick={() => searchButtonClickEvt(false)} sx={{ cursor: "pointer" }} />
               <span className="text-center flex-grow mr-6 text-lg">검색</span>
             </div>
             <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
               <SearchIcon />
-              <input className="h-full w-full p-2 outline-none" placeholder="키워드" />
+              <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => searchToDoEvt(e.target.value)} />
             </div>
-            <div className="w-full" style={{height: "calc(100% - 5.55rem)"}}>
-              <div className="w-full h-full flex justify-center items-center text-gray-400">
-                <span>키워드를 입력하세요.</span>
-              </div>
+            <div className="w-full" style={{ height: "calc(100% - 5.55rem)" }}>
+              {
+                searchedToDoList.length === 0 && !searchInputRef.current?.value &&
+                <div className="w-full h-full flex justify-center items-center text-gray-400">
+                  <span>키워드를 입력하세요.</span>
+                </div>
+              }
+              {
+                searchedToDoList.length === 0 && searchInputRef.current?.value &&
+                <div className="w-full h-full flex justify-center items-center text-gray-400">
+                  <span>검색 결과가 없습니다.</span>
+                </div>
+              }
+              {
+                searchedToDoList.length > 0 && searchInputRef.current?.value &&
+                searchedToDoList.map((t) => {
+                  return (
+                    <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
+                      <div className="w-full h-full">
+                        <div className="text-white rounded p-1 mb-1" style={{backgroundColor: `${t.color}`}}>
+                          {t.start.split('T')[0]}
+                        </div>
+                        <div>{t.title}</div>
+                        <div>{t.description ? t.description : '-'}</div>
+                      </div>
+                    </div>
+                  )
+                })
+              }
             </div>
           </div>
         </CSSTransition>

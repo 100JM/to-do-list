@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
@@ -13,9 +15,10 @@ interface CustomAlertInterface {
 }
 
 const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAlert }) => {
-    const handleClose = () => {
-        handleShowAlert(false, '', 'success');
-    };
+
+    // useEffect(() => {
+
+    // }, [showAlert.isShow]);
 
     const action = (
         <>
@@ -23,7 +26,7 @@ const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAler
                 size="small"
                 aria-label="close"
                 color="inherit"
-                onClick={handleClose}
+                onClick={() => handleShowAlert(false, '', 'success')}
             >
                 <CloseIcon fontSize="small" />
             </IconButton>
@@ -34,7 +37,7 @@ const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAler
         <Snackbar
             open={showAlert.isShow}
             autoHideDuration={5000}
-            onClose={handleClose}
+            onClose={() => handleShowAlert(false, '', 'success')}
             anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right'

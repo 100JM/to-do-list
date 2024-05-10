@@ -254,7 +254,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const updateTask = () => {
         const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
-
+        
         if (!(toDoValueRef.current.title as HTMLInputElement).value) {
             alert('제목을 입력해주세요.');
             (toDoValueRef.current.title as HTMLInputElement).focus();
@@ -272,11 +272,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         let updatedEndDateValue: string;
 
         if (isAllday) {
-            updatedStartDateValue = selectedDate.start;
-            updatedEndDateValue = dayjs(dayjs(selectedDate.end).add(1, 'day')).format('YYYY-MM-DD');
+            updatedStartDateValue = selectedDateEventInfo.start.split('T')[0];
+            updatedEndDateValue = dayjs(dayjs(selectedDateEventInfo.end.split('T')[0]).add(1, 'day')).format('YYYY-MM-DD'); // 여기 수정해야함 계속 1일씩 늘어남
         } else {
-            updatedStartDateValue = `${selectedDate.start}T${selectedTime.startTime}`;
-            updatedEndDateValue = `${selectedDate.end}T${selectedTime.endTime}`;
+            updatedStartDateValue = `${selectedDateEventInfo.start.split('T')[0]}T${selectedTime.startTime}`;
+            updatedEndDateValue = `${selectedDateEventInfo.end.split('T')[0]}T${selectedTime.endTime}`;
         }
 
         const updatedToDo: object = {
