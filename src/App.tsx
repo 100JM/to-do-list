@@ -1,10 +1,10 @@
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
 import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CssDimValue, EventApi } from '@fullcalendar/core/index.js';
+import { Calendar, CssDimValue, EventApi } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
@@ -53,6 +53,7 @@ function App() {
     display: 'block'
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isAddArea, setIsAddArea] = useState<boolean>(false);
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
     isShow: false,
     alertText: '',
@@ -126,6 +127,12 @@ function App() {
 
   const [searchedToDoList, setSearchedToDoList] = useState<Array<any>>([]);
 
+  useEffect(() => {
+    if(showSearchForm){
+      searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
+    }
+  }, [toDoList])
+
   const addNewTodoList = (newToDo: object) => {
     setToDoList((prevList) => [...prevList, newToDo]);
   }
@@ -194,6 +201,7 @@ function App() {
 
   const closeTodoModal = useCallback(() => {
     setIsOpen(false);
+    setIsAddArea(false);
   }, []);
 
   const getSelectedEventInfo = (id: string) => {
@@ -272,14 +280,14 @@ function App() {
   };
 
   const searchResultClickEvt = (id:string) => {
-    console.log(id);
-    // setIsOpen(true);
-    // getSelectedEventInfo(id);
+    getSelectedEventInfo(id);
+    setIsAddArea(true);
+    setIsOpen(true);
   };
   
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} />}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm}/>}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <CSSTransition
           in={!showSearchForm}

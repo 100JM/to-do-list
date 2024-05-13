@@ -8,6 +8,7 @@ import CustomAlert from './CustomAlert';
 
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from '@mui/icons-material/Close';
 import Switch from '@mui/material/Switch';
 import Drawer from '@mui/material/Drawer';
 
@@ -65,6 +66,9 @@ interface TodoDialogInterface {
         alertText: string,
         alertType: 'error' | 'warning' | 'info' | 'success'
     };
+    isAddArea: boolean;
+    setIsAddArea: (show: boolean) => void;
+    showSearchForm: boolean;
 }
 
 interface OpenColorBarInterface {
@@ -86,13 +90,13 @@ interface DateData {
     color: string,
     colorName: string,
     description: string,
-    important: boolean,    
+    important: boolean,
     display: string,
 }
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert }) => {
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert, isAddArea, setIsAddArea, showSearchForm }) => {
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -102,7 +106,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         endTime: defaultEndDateTime
     });
 
-    const [isAddArea, setIsAddArea] = useState<boolean>(false);
+    // const [isAddArea, setIsAddArea] = useState<boolean>(false);
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
@@ -114,7 +118,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     useEffect(() => {
         setDialogDate(selectedDate.start);
     }, []);
-    
+
     const timeRef = useRef<HTMLDivElement | null>(null);
     const toDoValueRef = useRef<ToDoValueRefs>({});
     let dateData: DateData = {
@@ -129,7 +133,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         important: (selectedDateEventInfo.id ? selectedDateEventInfo.important : selectedDate.important),
         display: 'block'
     };
-    
+
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
@@ -367,9 +371,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        <IconButton aria-label="delete" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
-                            <ArrowBackIcon />
-                        </IconButton>
+                        {showSearchForm ?
+                            <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
+                                <CloseIcon />
+                            </IconButton>
+                            :
+                            <IconButton aria-label="delete" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
+                                <ArrowBackIcon />
+                            </IconButton>
+                        }
                         <div className='p-1'>
 
                             {selectedDateEventInfo.id ?
@@ -468,7 +478,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                             <DatePicker
                                                 defaultValue={(dateData.allDay ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dayjs(dateData.end))}
-                                                onChange={(date) => {handletDate('end', date, (dateData.id !== '')) }}
+                                                onChange={(date) => { handletDate('end', date, (dateData.id !== '')) }}
                                                 className="w-22 sm:w-48"
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
