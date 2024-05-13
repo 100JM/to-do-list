@@ -209,20 +209,23 @@ function App() {
     })
   };
 
-  const setTaskInfo = (name: string, value: string | boolean) => {
-    setSelectedDate((prevInfo) => {
-      return {
-        ...prevInfo,
-        [name]: value
-      }
-    });
-
-    setSelectedDateEventInfo((prevInfo) => {
-      return {
-        ...prevInfo,
-        [name]: value
-      }
-    });
+  const setTaskInfo = (name: string, value: string | boolean, isUpdate:boolean) => {
+    if(!isUpdate) {
+      setSelectedDate((prevInfo) => {
+        return {
+          ...prevInfo,
+          [name]: value
+        }
+      });
+    }else {
+      setSelectedDateEventInfo((prevInfo) => {
+        return {
+          ...prevInfo,
+          [name]: value
+        }
+      });
+    }
+    
   };
 
   const setSelectedEventInfoDefault = () => {
@@ -273,7 +276,7 @@ function App() {
     // setIsOpen(true);
     // getSelectedEventInfo(id);
   };
-  console.log(toDoList);
+  
   return (
     <>
       {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} />}
