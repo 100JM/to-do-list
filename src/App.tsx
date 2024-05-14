@@ -4,7 +4,7 @@ import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
 import { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { Calendar, CssDimValue, EventApi } from '@fullcalendar/core/index.js';
+import { CssDimValue, EventApi } from '@fullcalendar/core/index.js';
 import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
@@ -15,6 +15,13 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
+
+import Box from '@mui/material/Box';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import PushPinIcon from '@mui/icons-material/PushPin';
 
 interface SelectedDateInterface {
   id: string;
@@ -36,7 +43,7 @@ interface CustomAlertInterface {
 }
 
 function App() {
-  const calenderHeight: CssDimValue = '100%';
+  const calendarHeight: CssDimValue = '92%';
   const defaultStartDate: string = new Date().toISOString();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -52,15 +59,19 @@ function App() {
     important: false,
     display: 'block'
   });
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAddArea, setIsAddArea] = useState<boolean>(false);
+
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
     isShow: false,
     alertText: '',
     alertType: 'success'
   });
+
   const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
+
   const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<SelectedDateInterface>({
     id: '',
     title: '',
@@ -126,12 +137,19 @@ function App() {
   );
 
   const [searchedToDoList, setSearchedToDoList] = useState<Array<any>>([]);
+  const [bottomMenu, setBottomMenu] = useState('calendar');
 
   useEffect(() => {
-    if(showSearchForm){
+    if (showSearchForm) {
       searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
     }
-  }, [toDoList])
+  }, [toDoList]);
+
+  const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
+    if(newValue !== 'todo') {
+      setBottomMenu(newValue);
+    }
+  };
 
   const addNewTodoList = (newToDo: object) => {
     setToDoList((prevList) => [...prevList, newToDo]);
@@ -153,20 +171,12 @@ function App() {
     }));
   }
 
-  const customButtonClickEvt = useCallback(() => {
-    setSelectedDate((prevDate) => {
-      return {
-        ...prevDate,
-        start: dayjs().format('YYYY-MM-DD'),
-        end: dayjs().format('YYYY-MM-DD')
-      }
-    })
-
-    setIsOpen(true);
-  }, []);
-
   const searchButtonClickEvt = (isShow: boolean) => {
     setShowSearchForm(isShow);
+
+    if(!isShow) {
+      setBottomMenu('calendar')
+    }
   };
 
   const dateClickEvt = (arg: DateClickArg) => {
@@ -217,15 +227,15 @@ function App() {
     })
   };
 
-  const setTaskInfo = (name: string, value: string | boolean, isUpdate:boolean) => {
-    if(!isUpdate) {
+  const setTaskInfo = (name: string, value: string | boolean, isUpdate: boolean) => {
+    if (!isUpdate) {
       setSelectedDate((prevInfo) => {
         return {
           ...prevInfo,
           [name]: value
         }
       });
-    }else {
+    } else {
       setSelectedDateEventInfo((prevInfo) => {
         return {
           ...prevInfo,
@@ -233,7 +243,7 @@ function App() {
         }
       });
     }
-    
+
   };
 
   const setSelectedEventInfoDefault = () => {
@@ -279,15 +289,20 @@ function App() {
     setSearchedToDoList(searchResult);
   };
 
-  const searchResultClickEvt = (id:string) => {
+  const searchResultClickEvt = (id: string) => {
     getSelectedEventInfo(id);
     setIsAddArea(true);
     setIsOpen(true);
   };
-  
+
+  const todoButtonEvt = () => {
+    setIsAddArea(true);
+    setIsOpen(true);
+  };
+
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm}/>}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <CSSTransition
           in={!showSearchForm}
@@ -295,32 +310,44 @@ function App() {
           classNames="slide"
           unmountOnExit
         >
-          <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            editable={false}
-            height={calenderHeight}
-            locale={koLocale}
-            customButtons={{
-              addTodoButton: {
-                text: '중요일정',
-                click: customButtonClickEvt,
-              },
-              searchButton: {
-                icon: 'bi bi-search',
-                click: () => { searchButtonClickEvt(true) },
-              },
-            }}
-            headerToolbar={{
-              left: 'prev,next today addTodoButton',
-              center: 'title',
-              right: 'searchButton',
-            }}
-            dateClick={dateClickEvt}
-            events={toDoList}
-            displayEventTime={false}
-            timeZone='UTC'
-          />
+          <div className="w-full h-full">
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              editable={false}
+              height={calendarHeight}
+              locale={koLocale}
+              customButtons={{
+                searchButton: {
+                  icon: 'bi bi-search',
+                  click: () => { searchButtonClickEvt(true) },
+                },
+              }}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'searchButton',
+              }}
+              dateClick={dateClickEvt}
+              events={toDoList}
+              displayEventTime={false}
+              timeZone='UTC'
+            />
+            <Box sx={{
+              width: "100%",
+              "& .MuiBottomNavigationAction-root": { color: "#2c3e50" },
+            }}>
+              <BottomNavigation
+                showLabels
+                value={bottomMenu}
+                onChange={handleBottomMenuChange}
+              >
+                <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
+                <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{color: "#DC143C !important"}} onClick={todoButtonEvt} />
+                <BottomNavigationAction label="중요 일정" value="importantTodo" icon={<PushPinIcon />} />
+              </BottomNavigation>
+            </Box>
+          </div>
         </CSSTransition>
         <CSSTransition
           in={showSearchForm}
@@ -356,7 +383,7 @@ function App() {
                   return (
                     <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
                       <div className="w-full h-full">
-                        <div className="text-white rounded p-1 mb-1" style={{backgroundColor: `${t.color}`}}>
+                        <div className="text-white rounded p-1 mb-1" style={{ backgroundColor: `${t.color}` }}>
                           {t.start.split('T')[0]}
                         </div>
                         <div>{t.title}</div>

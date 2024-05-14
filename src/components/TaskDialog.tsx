@@ -97,7 +97,7 @@ interface DateData {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert, isAddArea, setIsAddArea, showSearchForm }) => {
-
+    
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -133,7 +133,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         important: (selectedDateEventInfo.id ? selectedDateEventInfo.important : selectedDate.important),
         display: 'block'
     };
-
+    console.log(selectedTime);
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
@@ -156,6 +156,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                 }
             })
         }
+
     }, [selectedDateEventInfo.id]);
 
     const handleIsAllday = () => {
@@ -205,6 +206,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const handleEndTime = (date: Dayjs | null) => {
         if (date) {
+            console.log(date);
             setSelectedTime((prevTime) => {
                 return {
                     ...prevTime,
@@ -286,7 +288,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             updatedEndDateValue = dayjs(dayjs((toDoValueRef.current.end as HTMLInputElement).value).add(1, 'day')).format('YYYY-MM-DD');
         } else {
             updatedStartDateValue = `${selectedDateEventInfo.start.split('T')[0]}T${selectedTime.startTime}`;
-            updatedEndDateValue = `${selectedDateEventInfo.end.split('T')[0]}T${selectedTime.endTime}`;
+            updatedEndDateValue = `${(toDoValueRef.current.end as HTMLInputElement).value}T${selectedTime.endTime}`;
         }
 
         const updatedToDo: object = {
@@ -435,7 +437,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                                 format="YYYY-MM-DD"
                                                 shouldDisableDate={day => {
                                                     return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isAfter(
-                                                        (isAllday ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dateData.end)
+                                                        // (dateData.id !== '')
+                                                        //     ?
+                                                        //     (isAllday ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dateData.end)
+                                                        //     :
+                                                        //     dateData.end
+                                                        (toDoValueRef.current.end as HTMLInputElement)?.value
                                                     );
                                                 }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
@@ -451,11 +458,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             {!isAllday && <TimePicker
                                                 ref={timeRef}
                                                 className="w-22 sm:w-48 custom-input"
-                                                format="H:mm:A"
+                                                format="HH:mm:A"
                                                 value={dayjs(selectedTime.startTime, 'HH:mm')}
                                                 onChange={(date) => { handleStartTime(date) }}
                                                 shouldDisableTime={time => {
-                                                    return dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isAfter(dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${selectedTime.endTime}`));
+                                                    return dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm')}`).isAfter(
+                                                        // dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${selectedTime.endTime}`)
+                                                        dayjs(`${(toDoValueRef.current.end as HTMLInputElement)?.value}T${selectedTime.endTime}`)
+                                                    );
                                                 }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
@@ -501,11 +511,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             />
                                             {!isAllday && <TimePicker
                                                 className="w-22 sm:w-48 custom-input"
-                                                format="H:mm:A"
+                                                format="HH:mm:A"
                                                 value={dayjs(selectedTime.endTime, 'HH:mm')}
                                                 onChange={(date) => { handleEndTime(date) }}
                                                 shouldDisableTime={time => {
-                                                    return dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm:ss')}`).isBefore(dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${selectedTime.startTime}`));
+                                                    return dayjs(`${(toDoValueRef.current.end as HTMLInputElement)?.value}T${dayjs(time).format('HH:mm')}`).isBefore(
+                                                        dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${selectedTime.startTime}`) // 여기 수정
+                                                    );
                                                 }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
