@@ -16,10 +16,6 @@ interface CustomAlertInterface {
 
 const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAlert }) => {
 
-    // useEffect(() => {
-
-    // }, [showAlert.isShow]);
-
     const action = (
         <>
             <IconButton
@@ -45,7 +41,6 @@ const CustomAlert: React.FC<CustomAlertInterface> = ({ showAlert, handleShowAler
         >
             <Alert severity={showAlert.alertType} action={action}>{showAlert.alertText}</Alert>
         </Snackbar>
-
     )
 }
 

@@ -69,6 +69,7 @@ interface TodoDialogInterface {
     isAddArea: boolean;
     setIsAddArea: (show: boolean) => void;
     showSearchForm: boolean;
+    isTodoButton: boolean;
 }
 
 interface OpenColorBarInterface {
@@ -96,8 +97,8 @@ interface DateData {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert, isAddArea, setIsAddArea, showSearchForm }) => {
-    
+const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert, isAddArea, setIsAddArea, showSearchForm, isTodoButton }) => {
+
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
 
@@ -106,7 +107,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         endTime: defaultEndDateTime
     });
 
-    // const [isAddArea, setIsAddArea] = useState<boolean>(false);
     const [isAllday, setIsAllday] = useState<boolean>(true);
     const [openColorBar, setOpenColorBar] = useState<OpenColorBarInterface>({
         open: false,
@@ -119,6 +119,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         setDialogDate(selectedDate.start);
     }, []);
 
+    const dateRef = useRef<HTMLDivElement | null>(null);
     const timeRef = useRef<HTMLDivElement | null>(null);
     const toDoValueRef = useRef<ToDoValueRefs>({});
     let dateData: DateData = {
@@ -133,7 +134,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         important: (selectedDateEventInfo.id ? selectedDateEventInfo.important : selectedDate.important),
         display: 'block'
     };
-    console.log(selectedTime);
+
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
@@ -206,7 +207,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
 
     const handleEndTime = (date: Dayjs | null) => {
         if (date) {
-            console.log(date);
             setSelectedTime((prevTime) => {
                 return {
                     ...prevTime,
@@ -217,7 +217,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     };
 
     const submitTask = () => {
-        const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
+        const checkDateInput = dateRef.current?.classList.contains('date-error');
+        const checkTimeInput = timeRef.current?.classList.contains('date-error');
+
 
         if (!(toDoValueRef.current.title as HTMLInputElement).value) {
             handleShowAlert(true, '제목을 입력해주세요.', 'warning');
@@ -225,11 +227,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             return;
         }
 
-        if (checkTimeInput) {
-            if (checkTimeInput.classList.contains('Mui-error')) {
-                handleShowAlert(true, '시작시간과 종료시간이 올바르지 않습니다.', 'error');
-                return;
-            }
+
+        
+        if (checkTimeInput || checkDateInput) {
+            handleShowAlert(true, '시작일과 종료일이 올바르지 않습니다.', 'error');
+            return;
         }
 
         let selectStartDateValue: string;
@@ -264,7 +266,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
     };
 
     const updateTask = () => {
-        const checkTimeInput = timeRef.current?.querySelector('.MuiInputBase-root');
+        const checkUpdateDateInput = dateRef.current?.classList.contains('date-error');
+        const checkUpdateTimeInput = timeRef.current?.classList.contains('date-error');
+
 
         if (!(toDoValueRef.current.title as HTMLInputElement).value) {
             handleShowAlert(true, '제목을 입력해주세요.', 'warning');
@@ -272,11 +276,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             return;
         }
 
-        if (checkTimeInput) {
-            if (checkTimeInput.classList.contains('Mui-error')) {
-                handleShowAlert(true, '시작시간과 종료시간이 올바르지 않습니다.', 'error');
-                return;
-            }
+        if (checkUpdateDateInput || checkUpdateTimeInput) {
+            handleShowAlert(true, '시작일과 종료일이 올바르지 않습니다.', 'error');
+            return;
         }
 
         let updatedStartDateValue: string;
@@ -373,7 +375,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        {showSearchForm ?
+                        {(showSearchForm || isTodoButton) ?
                             <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
                                 <CloseIcon />
                             </IconButton>
@@ -430,43 +432,32 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                     <div className="flex items-center">
                                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                             <DatePicker
+                                                ref={dateRef}
                                                 value={dayjs(dateData.start)}
                                                 onChange={(date) => { handletDate('start', date, (dateData.id !== '')) }}
-                                                className="w-22 sm:w-48"
+                                                className={`w-22 sm:w-48 ${dayjs(dateData.start).format('YYYY-MM-DD') > dayjs(dateData.end).format('YYYY-MM-DD') ? 'date-error' : ''}`}
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
-                                                shouldDisableDate={day => {
-                                                    return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isAfter(
-                                                        // (dateData.id !== '')
-                                                        //     ?
-                                                        //     (isAllday ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dateData.end)
-                                                        //     :
-                                                        //     dateData.end
-                                                        (toDoValueRef.current.end as HTMLInputElement)?.value
-                                                    );
-                                                }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
-                                                    "& input": { height: "18px" }, // width - 610 -> media
+                                                    "& input": { height: "18px" },
                                                     "& .MuiInputBase-root": { borderRadius: "32px" },
                                                     "@media (max-width: 640px)": {
                                                         "& input": { height: "8px", fontSize: "11px", textAlign: "center", padding: "14px 0 14px 14px" }
                                                     },
                                                     "& fieldset": { borderColor: openColorBar.selectedColor }
                                                 }}
+                                                inputRef={(e) => toDoValueRef.current['start'] = e}
+                                                
                                             />
                                             {!isAllday && <TimePicker
                                                 ref={timeRef}
-                                                className="w-22 sm:w-48 custom-input"
+                                                className={
+                                                    `w-22 sm:w-48 custom-input ${(dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${selectedTime.startTime}`) > dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${selectedTime.endTime}`)) ? 'date-error' : ''}`
+                                                }
                                                 format="HH:mm:A"
                                                 value={dayjs(selectedTime.startTime, 'HH:mm')}
                                                 onChange={(date) => { handleStartTime(date) }}
-                                                shouldDisableTime={time => {
-                                                    return dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${dayjs(time).format('HH:mm')}`).isAfter(
-                                                        // dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${selectedTime.endTime}`)
-                                                        dayjs(`${(toDoValueRef.current.end as HTMLInputElement)?.value}T${selectedTime.endTime}`)
-                                                    );
-                                                }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
                                                     "& input": { height: "18px" },
@@ -489,15 +480,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                             <DatePicker
                                                 defaultValue={(dateData.allDay ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dayjs(dateData.end))}
                                                 onChange={(date) => { handletDate('end', date, (dateData.id !== '')) }}
-                                                className="w-22 sm:w-48"
+                                                className={`w-22 sm:w-48 ${dayjs(dateData.start).format('YYYY-MM-DD') > dayjs(dateData.end).format('YYYY-MM-DD') ? 'date-error' : ''}`}
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
-                                                shouldDisableDate={day => {
-                                                    return dayjs(dayjs(day as Dayjs).format(`YYYY-MM-DD`)).isBefore(
-                                                        // (selectedDate.allDay ? (selectedDate.start.split('T')[0] === selectedDate.end.split('T')[0] ?  dayjs(selectedDate.start).add(-1, 'day') : dayjs(selectedDate.start)) : dayjs(selectedDate.start).add(-1, 'day'))
-                                                        dayjs(dateData.start).format(`YYYY-MM-DD`)
-                                                    );
-                                                }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
                                                     "& input": { height: "18px" },
@@ -510,15 +495,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                                 inputRef={(e) => toDoValueRef.current['end'] = e}
                                             />
                                             {!isAllday && <TimePicker
-                                                className="w-22 sm:w-48 custom-input"
+                                                className={
+                                                    `w-22 sm:w-48 custom-input ${(dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${selectedTime.startTime}`) > dayjs(`${dayjs(dateData.end).format('YYYY-MM-DD')}T${selectedTime.endTime}`)) ? 'date-error' : ''}`
+                                                }
                                                 format="HH:mm:A"
                                                 value={dayjs(selectedTime.endTime, 'HH:mm')}
                                                 onChange={(date) => { handleEndTime(date) }}
-                                                shouldDisableTime={time => {
-                                                    return dayjs(`${(toDoValueRef.current.end as HTMLInputElement)?.value}T${dayjs(time).format('HH:mm')}`).isBefore(
-                                                        dayjs(`${dayjs(dateData.start).format('YYYY-MM-DD')}T${selectedTime.startTime}`) // 여기 수정
-                                                    );
-                                                }}
                                                 desktopModeMediaQuery="@media (min-width: 640px)"
                                                 sx={{
                                                     "& input": { height: "18px" },

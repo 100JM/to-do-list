@@ -62,6 +62,7 @@ function App() {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAddArea, setIsAddArea] = useState<boolean>(false);
+  const [isTodoButton, setIsTodoButton] = useState<boolean>(false);
 
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
     isShow: false,
@@ -212,6 +213,7 @@ function App() {
   const closeTodoModal = useCallback(() => {
     setIsOpen(false);
     setIsAddArea(false);
+    setIsTodoButton(false);
   }, []);
 
   const getSelectedEventInfo = (id: string) => {
@@ -296,13 +298,31 @@ function App() {
   };
 
   const todoButtonEvt = () => {
+    setSelectedDate((prevDate) => {
+      return {
+        ...prevDate,
+        id: '',
+        title: '',
+        allDay: true,
+        start: defaultStartDate,
+        end: defaultStartDate,
+        color: '#3788d8',
+        colorName: '워터블루',
+        description: '',
+        important: false,
+        display: 'block'
+      }
+    });
+
+    setSelectedEventInfoDefault();
+    setIsTodoButton(true);
     setIsAddArea(true);
     setIsOpen(true);
   };
 
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm} />}
+      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm} isTodoButton={isTodoButton} />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <CSSTransition
           in={!showSearchForm}
