@@ -6,6 +6,10 @@ html, body, #root {
   overflow: hidden;
 }
 
+.fc {
+  height: 92%;
+}
+
 .fc-header-toolbar {
   padding-top: 1em;
   padding-left: 1em;
@@ -34,6 +38,12 @@ html, body, #root {
 .date-error .MuiInputBase-root {
   color: #ef3b27 !important;
   background-color: #fa807257;
+}
+
+@media (min-width : 720px) {
+  .fc {
+    height: 100%;
+  }
 }
 
 @media (max-width : 540px) {

@@ -72,6 +72,7 @@ function App() {
 
   const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
   const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
+  const [importantEventList, setImportantEventList] = useState<Array<any>>([]);
 
   const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<SelectedDateInterface>({
     id: '',
@@ -131,7 +132,7 @@ function App() {
         color: '#FA8072',
         colorName: '살몬',
         allDay: false,
-        important: false,
+        important: true,
         display: "block"
       }
     ]
@@ -144,10 +145,14 @@ function App() {
     if (showSearchForm) {
       searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
     }
+
+    if(bottomMenu === 'importantTodo') {
+      getImportantTodoList();
+    }
   }, [toDoList]);
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
-    if(newValue !== 'todo') {
+    if (newValue !== 'todo') {
       setBottomMenu(newValue);
     }
   };
@@ -175,7 +180,7 @@ function App() {
   const searchButtonClickEvt = (isShow: boolean) => {
     setShowSearchForm(isShow);
 
-    if(!isShow) {
+    if (!isShow) {
       setBottomMenu('calendar')
     }
   };
@@ -320,9 +325,36 @@ function App() {
     setIsOpen(true);
   };
 
+  const getImportantTodoList = () => {
+    const importantTodoList = toDoList.filter((t) => {
+      return t.important === true;
+    });
+
+    setImportantEventList(importantTodoList);
+  };
+
   return (
     <>
-      {isOpen && <TodoDialog isOpen={isOpen} closeTodoModal={closeTodoModal} selectedDate={selectedDate} addNewTodoList={addNewTodoList} updateTaskInfo={updateTaskInfo} deleteTaskInfo={deleteTaskInfo} selectedDateEventList={selectedDateEventList} getSelectedEventInfo={getSelectedEventInfo} setTaskInfo={setTaskInfo} selectedDateEventInfo={selectedDateEventInfo} setSelectedEventInfoDefault={setSelectedEventInfoDefault} handleShowAlert={handleShowAlert} showAlert={showAlert} isAddArea={isAddArea} setIsAddArea={setIsAddArea} showSearchForm={showSearchForm} isTodoButton={isTodoButton} />}
+      {isOpen && <TodoDialog
+        isOpen={isOpen}
+        closeTodoModal={closeTodoModal}
+        selectedDate={selectedDate}
+        addNewTodoList={addNewTodoList}
+        updateTaskInfo={updateTaskInfo}
+        deleteTaskInfo={deleteTaskInfo}
+        selectedDateEventList={selectedDateEventList}
+        getSelectedEventInfo={getSelectedEventInfo}
+        setTaskInfo={setTaskInfo}
+        selectedDateEventInfo={selectedDateEventInfo}
+        setSelectedEventInfoDefault={setSelectedEventInfoDefault}
+        handleShowAlert={handleShowAlert}
+        showAlert={showAlert}
+        isAddArea={isAddArea}
+        setIsAddArea={setIsAddArea}
+        showSearchForm={showSearchForm}
+        isTodoButton={isTodoButton}
+        bottomMenu={bottomMenu}
+      />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
         <CSSTransition
           in={!showSearchForm}
@@ -331,40 +363,75 @@ function App() {
           unmountOnExit
         >
           <div className="w-full h-full">
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              editable={false}
-              height={calendarHeight}
-              locale={koLocale}
-              customButtons={{
-                searchButton: {
-                  icon: 'bi bi-search',
-                  click: () => { searchButtonClickEvt(true) },
-                },
-              }}
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'searchButton',
-              }}
-              dateClick={dateClickEvt}
-              events={toDoList}
-              displayEventTime={false}
-              timeZone='UTC'
-            />
+            {
+              bottomMenu === 'calendar' &&
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                editable={false}
+                // height={calendarHeight}
+                locale={koLocale}
+                customButtons={{
+                  searchButton: {
+                    icon: 'bi bi-search',
+                    click: () => { searchButtonClickEvt(true) },
+                  },
+                }}
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: 'searchButton',
+                }}
+                dateClick={dateClickEvt}
+                events={toDoList}
+                displayEventTime={false}
+                timeZone='UTC'
+              />
+            }
+            {
+              bottomMenu === 'importantTodo' &&
+              <div style={{ width: "100%", height: "92%", overflowY: "auto" }}>
+                {
+                  importantEventList.map((i) => {
+                    return (
+                      <div className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer">
+                        <div className="w-4 rounded-md mr-2" style={{backgroundColor: `${i.color}`}}></div>
+                        <div className="w-full">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
+                          <div>{`시작일: ${i.start.split('T')[0]}`}</div>
+                          <div>{`종료일: ${i.end.split('T')[0]}`}</div>
+                        </div>
+                      </div>
+                    ) // 남은 기간 d-day & 클릭 시 dialog & 수정
+                  })
+                }
+              </div>
+            }
             <Box sx={{
               width: "100%",
+              height: "8%",
+              display: "block",
               "& .MuiBottomNavigationAction-root": { color: "#2c3e50" },
+              "@media (min-width:720px)": {
+                display: "none"
+              }
             }}>
               <BottomNavigation
                 showLabels
                 value={bottomMenu}
                 onChange={handleBottomMenuChange}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  paddingTop: "12px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignContent: "center"
+                }}
               >
                 <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
-                <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{color: "#DC143C !important"}} onClick={todoButtonEvt} />
-                <BottomNavigationAction label="중요 일정" value="importantTodo" icon={<PushPinIcon />} />
+                <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
+                <BottomNavigationAction label="중요 일정" value="importantTodo" icon={<PushPinIcon />} onClick={getImportantTodoList} />
               </BottomNavigation>
             </Box>
           </div>

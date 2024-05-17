@@ -70,6 +70,7 @@ interface TodoDialogInterface {
     setIsAddArea: (show: boolean) => void;
     showSearchForm: boolean;
     isTodoButton: boolean;
+    bottomMenu: string;
 }
 
 interface OpenColorBarInterface {
@@ -97,7 +98,26 @@ interface DateData {
 
 const koLocale: string = dayjs.locale('ko');
 
-const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, selectedDate, addNewTodoList, updateTaskInfo, deleteTaskInfo, selectedDateEventList, getSelectedEventInfo, setTaskInfo, selectedDateEventInfo, setSelectedEventInfoDefault, handleShowAlert, showAlert, isAddArea, setIsAddArea, showSearchForm, isTodoButton }) => {
+const TodoDialog: React.FC<TodoDialogInterface> = ({
+    isOpen,
+    closeTodoModal,
+    selectedDate,
+    addNewTodoList,
+    updateTaskInfo,
+    deleteTaskInfo,
+    selectedDateEventList,
+    getSelectedEventInfo,
+    setTaskInfo,
+    selectedDateEventInfo,
+    setSelectedEventInfoDefault,
+    handleShowAlert,
+    showAlert,
+    isAddArea,
+    setIsAddArea,
+    showSearchForm,
+    isTodoButton,
+    bottomMenu,
+}) => {
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -228,7 +248,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
         }
 
 
-        
+
         if (checkTimeInput || checkDateInput) {
             handleShowAlert(true, '시작일과 종료일이 올바르지 않습니다.', 'error');
             return;
@@ -375,7 +395,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
             {isAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        {(showSearchForm || isTodoButton) ?
+                        {(showSearchForm || isTodoButton || (bottomMenu === 'importantTodo')) ?
                             <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
                                 <CloseIcon />
                             </IconButton>
@@ -448,7 +468,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({ isOpen, closeTodoModal, sel
                                                     "& fieldset": { borderColor: openColorBar.selectedColor }
                                                 }}
                                                 inputRef={(e) => toDoValueRef.current['start'] = e}
-                                                
                                             />
                                             {!isAllday && <TimePicker
                                                 ref={timeRef}
