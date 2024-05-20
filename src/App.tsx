@@ -22,6 +22,9 @@ import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PushPinIcon from '@mui/icons-material/PushPin';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
 
 interface SelectedDateInterface {
   id: string;
@@ -332,7 +335,7 @@ function App() {
 
     setImportantEventList(importantTodoList);
   };
-  
+
   return (
     <>
       {isOpen && <TodoDialog
@@ -427,6 +430,35 @@ function App() {
                 </div>
               </>
             }
+            
+            {/* <Box sx={{
+              display: "none",
+              "@media (min-width:720px)": {
+                display: "block",
+                position: "absolute",
+                bottom: "30px",
+                right: "30px",
+              }
+            }}> */}
+              <SpeedDial
+                ariaLabel="Desktop SpeedDial"
+                icon={<SpeedDialIcon />}
+                sx={{
+                  display: "none",
+                  "@media (min-width:720px)": {
+                    display: "block",
+                    position: "absolute",
+                    bottom: "30px",
+                    right: "30px",
+                  }
+                }}
+                direction="up"
+              >
+                <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" />
+                <SpeedDialAction key="importantTodo" icon={<PushPinIcon />} tooltipTitle="중요 일정" />
+              </SpeedDial>
+            {/* </Box> */}
+            
             <Box sx={{
               width: "100%",
               height: "8%",
