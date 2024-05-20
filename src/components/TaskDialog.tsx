@@ -258,11 +258,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         let selectEndDateValue: string;
 
         if (isAllday) {
-            selectStartDateValue = selectedDate.start;
+            selectStartDateValue = selectedDate.start.split('T')[0];
             selectEndDateValue = dayjs(dayjs(selectedDate.end).add(1, 'day')).format('YYYY-MM-DD');
         } else {
-            selectStartDateValue = `${selectedDate.start}T${selectedTime.startTime}`;
-            selectEndDateValue = `${selectedDate.end}T${selectedTime.endTime}`;
+            selectStartDateValue = `${selectedDate.start.split('T')[0]}T${selectedTime.startTime}`;
+            selectEndDateValue = `${selectedDate.end.split('T')[0]}T${selectedTime.endTime}`;
         }
 
         const newToDo: object = {

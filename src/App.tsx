@@ -91,7 +91,7 @@ function App() {
     [
       {
         id: '1',
-        title: 'event1',
+        title: 'Aevent',
         start: '2024-05-08T09:00',
         end: '2024-05-09T18:00',
         color: '#3788d8',
@@ -102,7 +102,7 @@ function App() {
       },
       {
         id: '2',
-        title: 'event2',
+        title: 'Cevent',
         start: '2024-05-10T09:00',
         end: '2024-05-10T10:00',
         color: '#3788d8',
@@ -126,9 +126,9 @@ function App() {
       },
       {
         id: '4',
-        title: 'event4',
+        title: 'Bevent',
         start: '2024-05-11T09:00',
-        end: '2024-05-19T13:30',
+        end: '2024-05-24T13:30',
         color: '#FA8072',
         colorName: '살몬',
         allDay: false,
@@ -146,7 +146,7 @@ function App() {
       searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
     }
 
-    if(bottomMenu === 'importantTodo') {
+    if (bottomMenu === 'importantTodo') {
       getImportantTodoList();
     }
   }, [toDoList]);
@@ -332,7 +332,7 @@ function App() {
 
     setImportantEventList(importantTodoList);
   };
-
+  
   return (
     <>
       {isOpen && <TodoDialog
@@ -390,22 +390,42 @@ function App() {
             }
             {
               bottomMenu === 'importantTodo' &&
-              <div style={{ width: "100%", height: "92%", overflowY: "auto" }}>
-                {
-                  importantEventList.map((i) => {
-                    return (
-                      <div className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer">
-                        <div className="w-4 rounded-md mr-2" style={{backgroundColor: `${i.color}`}}></div>
-                        <div className="w-full">
-                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
-                          <div>{`시작일: ${i.start.split('T')[0]}`}</div>
-                          <div>{`종료일: ${i.end.split('T')[0]}`}</div>
+              <>
+                <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
+                <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
+                  {
+                    importantEventList.sort((a, b) => {
+                      const dateA = new Date(a.end.split('T')[0]);
+                      const dateB = new Date(b.end.split('T')[0]);
+                      return dateA.getTime() - dateB.getTime();
+                    }).map((i) => {
+                      return (
+                        <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
+                          <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
+                          <div className="w-full">
+                            <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
+                            <div>{`시작일 ${i.start.split('T')[0]}`}</div>
+                            <div className="flex justify-between">
+                              <div>{`종료일 ${(i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0])}`}</div>
+                              <div>{
+                                (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') > 0) ?
+                                  `D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`
+                                  :
+                                  (
+                                    (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') === 0) ?
+                                      'D-day 오늘'
+                                      :
+                                      '종료된 일정'
+                                  )
+                              }</div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ) // 남은 기간 d-day & 클릭 시 dialog & 수정
-                  })
-                }
-              </div>
+                      )
+                    })
+                  }
+                </div>
+              </>
             }
             <Box sx={{
               width: "100%",
@@ -451,7 +471,7 @@ function App() {
               <SearchIcon />
               <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => searchToDoEvt(e.target.value)} />
             </div>
-            <div className="w-full" style={{ height: "calc(100% - 5.55rem)" }}>
+            <div className="w-full overflow-y-auto" style={{ height: "calc(100% - 5.55rem)" }}>
               {
                 searchedToDoList.length === 0 && !searchInputRef.current?.value &&
                 <div className="w-full h-full flex justify-center items-center text-gray-400">
@@ -466,15 +486,15 @@ function App() {
               }
               {
                 searchedToDoList.length > 0 && searchInputRef.current?.value &&
-                searchedToDoList.map((t) => {
+                searchedToDoList.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())).map((t) => {
                   return (
                     <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
                       <div className="w-full h-full">
                         <div className="text-white rounded p-1 mb-1" style={{ backgroundColor: `${t.color}` }}>
                           {t.start.split('T')[0]}
                         </div>
-                        <div>{t.title}</div>
-                        <div>{t.description ? t.description : '-'}</div>
+                        <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.title}</div>
+                        <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.description ? t.description : '-'}</div>
                       </div>
                     </div>
                   )
