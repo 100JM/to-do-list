@@ -336,6 +336,14 @@ function App() {
     setImportantEventList(importantTodoList);
   };
 
+  const desktopMenuEvt = (value:string) => {
+    if(value === 'importantTodo') {
+      getImportantTodoList();
+    }
+
+    setBottomMenu(value);
+  }
+
   return (
     <>
       {isOpen && <TodoDialog
@@ -430,35 +438,24 @@ function App() {
                 </div>
               </>
             }
-            
-            {/* <Box sx={{
-              display: "none",
-              "@media (min-width:720px)": {
-                display: "block",
-                position: "absolute",
-                bottom: "30px",
-                right: "30px",
-              }
-            }}> */}
-              <SpeedDial
-                ariaLabel="Desktop SpeedDial"
-                icon={<SpeedDialIcon />}
-                sx={{
-                  display: "none",
-                  "@media (min-width:720px)": {
-                    display: "block",
-                    position: "absolute",
-                    bottom: "30px",
-                    right: "30px",
-                  }
-                }}
-                direction="up"
-              >
-                <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" />
-                <SpeedDialAction key="importantTodo" icon={<PushPinIcon />} tooltipTitle="중요 일정" />
-              </SpeedDial>
-            {/* </Box> */}
-            
+            <SpeedDial
+              ariaLabel="Desktop SpeedDial"
+              icon={<SpeedDialIcon />}
+              sx={{
+                display: "none",
+                "@media (min-width:720px)": {
+                  display: "flex",
+                  position: "absolute",
+                  bottom: "30px",
+                  right: "30px",
+                }
+              }}
+              direction="up"
+            >
+              <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
+              <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
+              <SpeedDialAction key="importantTodo" icon={<PushPinIcon />} tooltipTitle="중요 일정" onClick={() => desktopMenuEvt('importantTodo')} />
+            </SpeedDial>
             <Box sx={{
               width: "100%",
               height: "8%",
