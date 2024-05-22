@@ -19,6 +19,7 @@ import CustomAlert from './components/CustomAlert';
 import Box from '@mui/material/Box';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import Badge from '@mui/material/Badge';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PushPinIcon from '@mui/icons-material/PushPin';
@@ -149,9 +150,9 @@ function App() {
       searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
     }
 
-    if (bottomMenu === 'importantTodo') {
-      getImportantTodoList();
-    }
+    // if (bottomMenu === 'importantTodo') {
+    getImportantTodoList();
+    // }
   }, [toDoList]);
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -336,8 +337,8 @@ function App() {
     setImportantEventList(importantTodoList);
   };
 
-  const desktopMenuEvt = (value:string) => {
-    if(value === 'importantTodo') {
+  const desktopMenuEvt = (value: string) => {
+    if (value === 'importantTodo') {
       getImportantTodoList();
     }
 
@@ -420,11 +421,24 @@ function App() {
                               <div>{`종료일 ${(i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0])}`}</div>
                               <div>{
                                 (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') > 0) ?
-                                  `D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`
+                                  (
+                                    (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3) ?
+                                      <>
+                                        <i className="bi bi-alarm text-red-500">
+                                          {` D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`}
+                                        </i>
+                                      </>
+                                      :
+                                      ` D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`
+                                  )
                                   :
                                   (
                                     (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') === 0) ?
-                                      'D-day 오늘'
+                                      <>
+                                        <i className="bi bi-alarm text-red-500">
+                                          {'D-day 오늘'}
+                                        </i>
+                                      </>
                                       :
                                       '종료된 일정'
                                   )
@@ -454,7 +468,23 @@ function App() {
             >
               <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
               <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
-              <SpeedDialAction key="importantTodo" icon={<PushPinIcon />} tooltipTitle="중요 일정" onClick={() => desktopMenuEvt('importantTodo')} />
+              <SpeedDialAction
+                key="importantTodo"
+                icon={
+                  <Badge badgeContent={
+                    importantEventList.filter((i) => {
+                      return (
+                        dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3 && dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') >= 0
+                      )
+                    }).length
+                  }
+                    color="error">
+                    <PushPinIcon />
+                  </Badge>
+                }
+                tooltipTitle="중요 일정"
+                onClick={() => desktopMenuEvt('importantTodo')}
+              />
             </SpeedDial>
             <Box sx={{
               width: "100%",
@@ -480,7 +510,23 @@ function App() {
               >
                 <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
                 <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
-                <BottomNavigationAction label="중요 일정" value="importantTodo" icon={<PushPinIcon />} onClick={getImportantTodoList} />
+                <BottomNavigationAction
+                  label="중요 일정"
+                  value="importantTodo"
+                  icon={
+                    <Badge badgeContent={
+                      importantEventList.filter((i) => {
+                        return (
+                          dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3 && dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') >= 0
+                        )
+                      }).length
+                    }
+                      color="error">
+                      <PushPinIcon />
+                    </Badge>
+                  }
+                  onClick={getImportantTodoList}
+                />
               </BottomNavigation>
             </Box>
           </div>
