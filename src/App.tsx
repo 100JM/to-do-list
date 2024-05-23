@@ -409,8 +409,12 @@ function App() {
                     importantEventList.sort((a, b) => {
                       const dateA = new Date(a.end.split('T')[0]);
                       const dateB = new Date(b.end.split('T')[0]);
+
                       return dateA.getTime() - dateB.getTime();
                     }).map((i) => {
+                      const importantEndDate:string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                      const importantEndDday:number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
+                      
                       return (
                         <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
                           <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
@@ -418,31 +422,33 @@ function App() {
                             <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
                             <div>{`시작일 ${i.start.split('T')[0]}`}</div>
                             <div className="flex justify-between">
-                              <div>{`종료일 ${(i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0])}`}</div>
-                              <div>{
-                                (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') > 0) ?
-                                  (
-                                    (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3) ?
-                                      <>
-                                        <i className="bi bi-alarm text-red-500">
-                                          {` D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`}
-                                        </i>
-                                      </>
-                                      :
-                                      ` D-day ${dayjs(i.end.split('T')[0]).diff(dayjs(), 'day')}일`
-                                  )
-                                  :
-                                  (
-                                    (dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') === 0) ?
-                                      <>
-                                        <i className="bi bi-alarm text-red-500">
-                                          {'D-day 오늘'}
-                                        </i>
-                                      </>
-                                      :
-                                      '종료된 일정'
-                                  )
-                              }</div>
+                              <div>{`종료일 ${importantEndDate}`}</div>
+                              <div>
+                                {
+                                  (importantEndDday > 0) ?
+                                    (
+                                      (importantEndDday <= 3) ?
+                                        <>
+                                          <i className="bi bi-alarm text-red-500">
+                                            {` D-day ${importantEndDday}일`}
+                                          </i>
+                                        </>
+                                        :
+                                        ` D-day ${importantEndDday}일`
+                                    )
+                                    :
+                                    (
+                                      (importantEndDday === 0) ?
+                                        <>
+                                          <i className="bi bi-alarm text-red-500">
+                                            {'D-day 오늘'}
+                                          </i>
+                                        </>
+                                        :
+                                        '종료된 일정'
+                                    )
+                                }
+                              </div>
                             </div>
                           </div>
                         </div>
