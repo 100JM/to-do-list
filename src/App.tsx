@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -219,11 +219,11 @@ function App() {
     setIsOpen(true);
   };
 
-  const closeTodoModal = useCallback(() => {
+  const closeTodoModal = () => {
     setIsOpen(false);
     setIsAddArea(false);
     setIsTodoButton(false);
-  }, []);
+  };
 
   const getSelectedEventInfo = (id: string) => {
     const selectedTodo = toDoList.find((t) => {
