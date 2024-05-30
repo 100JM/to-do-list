@@ -24,7 +24,7 @@ import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare, faMapLocationDot, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
     isOpen: boolean;
@@ -357,7 +357,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         getSelectedEventInfo(taskId);
     };
-
+    // 주소 검색 후 위치 추가?
     return (
         <Dialog
             open={isOpen}
@@ -563,6 +563,26 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                 >
                                     <TaskColorButtons onClick={handleTaskColor} selectedColor={openColorBar.selectedColor} />
                                 </Drawer>
+                            </DialogContentsDiv>
+                            <DialogContentsDiv>
+                                <div className="flex justify-between items-center my-1 px-1">
+                                    <div>
+                                        <FontAwesomeIcon icon={faMapLocationDot as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                        <span className="ml-2">위치</span>
+                                    </div>
+                                    <div>
+                                        <button className="border px-3 py-1 rounded" style={{borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor}}>
+                                            <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                            <span>검색</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <small>추가된 위치 없음.</small>
+                                    <div>
+                                        지도 영역
+                                    </div>
+                                </div>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
                                 <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" value={dateData.description} onChange={(e) => { setTaskInfo(e.target.name, e.target.value, (dateData.id !== '')) }}></textarea>
