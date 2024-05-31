@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';

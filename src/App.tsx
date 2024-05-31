@@ -15,6 +15,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
+import KakaoAddrSearchForm from './components/KakaoAddrSearchForm';
 
 import Box from '@mui/material/Box';
 import BottomNavigation from '@mui/material/BottomNavigation';
