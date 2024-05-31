@@ -1,12 +1,20 @@
-import { Map } from 'react-kakao-maps-sdk'
+import { Map, MapMarker } from 'react-kakao-maps-sdk'
 
-const KakaoMap: React.FC = () => {
+interface KakaoMapInterface {
+    mapCenter: { 
+        lat: number 
+        lng: number
+    };
+}
+
+const KakaoMap: React.FC<KakaoMapInterface> = ({mapCenter}) => {
     return (
         <Map
-            center={{ lat: 33.5563, lng: 126.79581 }}   // 지도의 중심 좌표
-            style={{ height: '120px' }} // 지도 크기
-            level={5}                                   // 지도 확대 레벨
+            center={{ lat: mapCenter.lat, lng: mapCenter.lng }}
+            style={{ height: '120px' }}
+            level={5}
         >
+            <MapMarker position={{ lat: mapCenter.lat, lng: mapCenter.lng }} />
         </Map>
     )
 }

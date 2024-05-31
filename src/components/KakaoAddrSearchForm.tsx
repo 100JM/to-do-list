@@ -2,14 +2,13 @@ import React from 'react';
 import DaumPostcodeEmbed from 'react-daum-postcode';
 
 interface KakaoAddrSearchFormInterface {
-
+    handleAddrComplete: (value: any) => void
+    handleShowAddrSearch: (isShow: boolean) => void;
 }
 
-const KakaoAddrSearchForm: React.FC<KakaoAddrSearchFormInterface> = () => {
+const KakaoAddrSearchForm: React.FC<KakaoAddrSearchFormInterface> = ({handleAddrComplete, handleShowAddrSearch}) => {
     return (
-        // <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: "9999" }}>
-            <DaumPostcodeEmbed />
-        // </div>
+        <DaumPostcodeEmbed onComplete={handleAddrComplete} onClose={() => {handleShowAddrSearch(false)}}/>
     )
 }
 
