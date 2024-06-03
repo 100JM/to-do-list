@@ -39,6 +39,8 @@ interface SelectedDateInterface {
   description: string;
   important: boolean;
   display: string;
+  lat: number;
+  lng: number;
 }
 
 interface CustomAlertInterface {
@@ -62,7 +64,9 @@ function App() {
     colorName: '워터블루',
     description: '',
     important: false,
-    display: 'block'
+    display: 'block',
+    lat: 37.5665, 
+    lng: 126.9780
   });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -89,7 +93,9 @@ function App() {
     colorName: '워터블루',
     description: '',
     important: false,
-    display: 'block'
+    display: 'block',
+    lat: 37.5665, 
+    lng: 126.9780
   });
 
   const [toDoList, setToDoList] = useState<Array<any>>(
@@ -97,8 +103,8 @@ function App() {
       {
         id: '1',
         title: 'Aevent',
-        start: '2024-05-08T09:00',
-        end: '2024-05-09T18:00',
+        start: '2024-06-08T09:00',
+        end: '2024-06-09T18:00',
         color: '#3788d8',
         colorName: '워터블루',
         allDay: false,
@@ -108,8 +114,8 @@ function App() {
       {
         id: '2',
         title: 'Cevent',
-        start: '2024-05-10T09:00',
-        end: '2024-05-10T10:00',
+        start: '2024-06-10T09:00',
+        end: '2024-06-10T10:00',
         color: '#3788d8',
         colorName: '워터블루',
         allDay: false,
@@ -120,8 +126,8 @@ function App() {
       {
         id: '3',
         title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
-        start: '2024-05-10',
-        end: '2024-05-11',
+        start: '2024-06-10',
+        end: '2024-06-11',
         color: '#FA8072',
         colorName: '살몬',
         allDay: true,
@@ -131,14 +137,16 @@ function App() {
       },
       {
         id: '4',
-        title: 'Bevent',
-        start: '2024-05-11T09:00',
-        end: '2024-05-24T13:30',
+        title: '여행',
+        start: '2024-06-14',
+        end: '2024-06-19',
         color: '#FA8072',
         colorName: '살몬',
-        allDay: false,
+        allDay: true,
         important: true,
-        display: "block"
+        display: "block",
+        lat: 12.2529152,
+        lng: 109.1899018
       }
     ]
   );
@@ -213,7 +221,9 @@ function App() {
         colorName: '워터블루',
         description: '',
         important: false,
-        display: 'block'
+        display: 'block',
+        lat: 37.5665, 
+        lng: 126.9780
       }
     });
 
@@ -271,7 +281,9 @@ function App() {
         colorName: '워터블루',
         description: '',
         important: false,
-        display: 'block'
+        display: 'block',
+        lat: 37.5665, 
+        lng: 126.9780
       }
     });
   };
@@ -320,7 +332,9 @@ function App() {
         colorName: '워터블루',
         description: '',
         important: false,
-        display: 'block'
+        display: 'block',
+        lat: 37.5665, 
+        lng: 126.9780
       }
     });
 

@@ -11,7 +11,7 @@ const KakaoMap: React.FC<KakaoMapInterface> = ({mapCenter}) => {
     return (
         <Map
             center={{ lat: mapCenter.lat, lng: mapCenter.lng }}
-            style={{ height: '120px' }}
+            style={{ height: '150px' }}
             level={5}
         >
             <MapMarker position={{ lat: mapCenter.lat, lng: mapCenter.lng }} />

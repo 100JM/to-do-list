@@ -7,6 +7,8 @@ import TaskList from './TaskList';
 import CustomAlert from './CustomAlert';
 import KakaoMap from './KakaoMap';
 import KakaoAddrSearchForm from './KakaoAddrSearchForm';
+import GoogleMaps from './GoogleMaps';
+import GoogleAddrSearchForm from './GoogleAddrSearchForm';
 
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -42,6 +44,8 @@ interface TodoDialogInterface {
         description: string,
         important: boolean,
         display: string,
+        lat: number,
+        lng: number
     };
     addNewTodoList: (newToDo: object) => void;
     updateTaskInfo: (taskInfo: object) => void;
@@ -60,6 +64,8 @@ interface TodoDialogInterface {
         description: string,
         important: boolean,
         display: string,
+        lat: number,
+        lng: number
     };
     setSelectedEventInfoDefault: () => void;
     handleShowAlert: (isShow: boolean, alertText: string, alertType: 'error' | 'warning' | 'info' | 'success') => void;
@@ -96,6 +102,8 @@ interface DateData {
     description: string,
     important: boolean,
     display: string,
+    lat: number,
+    lng: number
 }
 
 const koLocale: string = dayjs.locale('ko');
@@ -157,7 +165,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         colorName: (selectedDateEventInfo.id ? selectedDateEventInfo.colorName : selectedDate.colorName),
         description: (selectedDateEventInfo.id ? selectedDateEventInfo.description : selectedDate.description),
         important: (selectedDateEventInfo.id ? selectedDateEventInfo.important : selectedDate.important),
-        display: 'block'
+        display: 'block',
+        lat: (selectedDateEventInfo.id ? selectedDateEventInfo.lat : mapCenter.lat),
+        lng: (selectedDateEventInfo.id ? selectedDateEventInfo.lng : mapCenter.lng),
     };
 
     useEffect(() => {
@@ -169,6 +179,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         if (selectedDateEventInfo.id) {
             setIsAllday(selectedDateEventInfo.allDay);
+            setMapCenter((prev) => {
+                return {
+                    ...prev,
+                    lat: (selectedDateEventInfo.lat ? selectedDateEventInfo.lat : mapCenter.lat),
+                    lng: (selectedDateEventInfo.lng ? selectedDateEventInfo.lng : mapCenter.lng),
+                }
+            })
         } else {
             setIsAllday(selectedDate.allDay);
         }
@@ -187,6 +204,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
     const handleShowAddrSearch = (isShow: boolean) => {
         setShowAddrSearch(isShow);
+    };
+
+    const handlePlaceClickEvt = (address: any) => {
+        setMapCenter(address.geometry.location.toJSON());
+        setSelectedAddr(address);
+        handleShowAddrSearch(false);
     };
 
     const handleAddrComplete = (value: any) => {
@@ -386,7 +409,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         getSelectedEventInfo(taskId);
     };
-    // 주소 검색 후 위치 추가?
+    // 주소 명도 데이터 항목에 추가 & 수정 저장에도 추가
     return (
         <Dialog
             open={isOpen}
@@ -611,13 +634,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                             style={{ zIndex: "9999" }}
                                             sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
                                         >
-                                            <KakaoAddrSearchForm handleAddrComplete={handleAddrComplete} handleShowAddrSearch={handleShowAddrSearch} />
+                                            {/* <KakaoAddrSearchForm handleAddrComplete={handleAddrComplete} handleShowAddrSearch={handleShowAddrSearch} /> */}
+                                            <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
                                         </Drawer>
                                     </div>
                                 </div>
                                 <div>
-                                    <small>{selectedAddr ? (selectedAddr.buildingName ? `${selectedAddr.address}, ${selectedAddr.buildingName}` : selectedAddr.address) : '추가된 위치 없음.'}</small>
-                                    <KakaoMap mapCenter={mapCenter} />
+                                    <small>{selectedAddr ? `${selectedAddr.name}, ${selectedAddr.formatted_address}` : '추가된 위치 없음.'}</small>
+                                    {/* <KakaoMap mapCenter={mapCenter} /> */}
+                                    <GoogleMaps mapCenter={mapCenter}/>
                                 </div>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
