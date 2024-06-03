@@ -41,6 +41,7 @@ interface SelectedDateInterface {
   display: string;
   lat: number;
   lng: number;
+  locationName: string;
 }
 
 interface CustomAlertInterface {
@@ -66,7 +67,8 @@ function App() {
     important: false,
     display: 'block',
     lat: 37.5665, 
-    lng: 126.9780
+    lng: 126.9780,
+    locationName: ''
   });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -95,7 +97,8 @@ function App() {
     important: false,
     display: 'block',
     lat: 37.5665, 
-    lng: 126.9780
+    lng: 126.9780,
+    locationName: ''
   });
 
   const [toDoList, setToDoList] = useState<Array<any>>(
@@ -139,14 +142,15 @@ function App() {
         id: '4',
         title: '여행',
         start: '2024-06-14',
-        end: '2024-06-19',
+        end: '2024-06-20',
         color: '#FA8072',
         colorName: '살몬',
         allDay: true,
         important: true,
         display: "block",
         lat: 12.2529152,
-        lng: 109.1899018
+        lng: 109.1899018,
+        locationName: '냐짱, 베트남 칸호아 냐짱'
       }
     ]
   );
@@ -223,7 +227,8 @@ function App() {
         important: false,
         display: 'block',
         lat: 37.5665, 
-        lng: 126.9780
+        lng: 126.9780,
+        locationName: ''
       }
     });
 
@@ -283,7 +288,8 @@ function App() {
         important: false,
         display: 'block',
         lat: 37.5665, 
-        lng: 126.9780
+        lng: 126.9780,
+        locationName: ''
       }
     });
   };
@@ -334,7 +340,8 @@ function App() {
         important: false,
         display: 'block',
         lat: 37.5665, 
-        lng: 126.9780
+        lng: 126.9780,
+        locationName: ''
       }
     });
 

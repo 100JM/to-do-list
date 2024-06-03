@@ -28,7 +28,7 @@ import 'dayjs/locale/ko';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare, faMapLocationDot, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare, faMapLocationDot, faMagnifyingGlass, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
     isOpen: boolean;
@@ -45,7 +45,8 @@ interface TodoDialogInterface {
         important: boolean,
         display: string,
         lat: number,
-        lng: number
+        lng: number,
+        locationName: string
     };
     addNewTodoList: (newToDo: object) => void;
     updateTaskInfo: (taskInfo: object) => void;
@@ -65,7 +66,8 @@ interface TodoDialogInterface {
         important: boolean,
         display: string,
         lat: number,
-        lng: number
+        lng: number,
+        locationName: string
     };
     setSelectedEventInfoDefault: () => void;
     handleShowAlert: (isShow: boolean, alertText: string, alertType: 'error' | 'warning' | 'info' | 'success') => void;
@@ -103,7 +105,8 @@ interface DateData {
     important: boolean,
     display: string,
     lat: number,
-    lng: number
+    lng: number,
+    locationName: string
 }
 
 const koLocale: string = dayjs.locale('ko');
@@ -168,6 +171,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         display: 'block',
         lat: (selectedDateEventInfo.id ? selectedDateEventInfo.lat : mapCenter.lat),
         lng: (selectedDateEventInfo.id ? selectedDateEventInfo.lng : mapCenter.lng),
+        locationName: (selectedDateEventInfo.id ? selectedDateEventInfo.locationName : selectedDate.locationName),
     };
 
     useEffect(() => {
@@ -185,7 +189,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                     lat: (selectedDateEventInfo.lat ? selectedDateEventInfo.lat : mapCenter.lat),
                     lng: (selectedDateEventInfo.lng ? selectedDateEventInfo.lng : mapCenter.lng),
                 }
-            })
+            });
+
+            if(selectedDateEventInfo.locationName !== '') {
+                setSelectedAddr(selectedDateEventInfo.locationName);
+            }
         } else {
             setIsAllday(selectedDate.allDay);
         }
@@ -208,12 +216,23 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
     const handlePlaceClickEvt = (address: any) => {
         setMapCenter(address.geometry.location.toJSON());
-        setSelectedAddr(address);
+        setSelectedAddr(`${address.name}, ${address.formatted_address}`);
         handleShowAddrSearch(false);
     };
 
+    const handleLocationDefault = () => {
+        setSelectedAddr('');
+        setMapCenter((prev) => {
+            return {
+                ...prev,
+                lat: 37.5665, 
+                lng: 126.9780
+            }
+        });
+    };
+
     const handleAddrComplete = (value: any) => {
-        setSelectedAddr(value);
+        setSelectedAddr(`${value.name}, ${value.formatted_address}`);
 
         const geocoder = new kakao.maps.services.Geocoder();
 
@@ -409,7 +428,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         getSelectedEventInfo(taskId);
     };
-    // 주소 명도 데이터 항목에 추가 & 수정 저장에도 추가
+    // 주소 & 위치 데이터  일정 수정 저장에도 추가하기
     return (
         <Dialog
             open={isOpen}
@@ -623,6 +642,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                         <span className="ml-2">위치</span>
                                     </div>
                                     <div>
+                                        <button className="border px-1 rounded mr-1" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={handleLocationDefault}>
+                                            <FontAwesomeIcon icon={faArrowRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                            <span>초기화</span>
+                                        </button>
                                         <button className="border px-1 rounded" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={() => handleShowAddrSearch(true)}>
                                             <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: openColorBar.selectedColor }} />
                                             <span>검색</span>
@@ -634,14 +657,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                             style={{ zIndex: "9999" }}
                                             sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
                                         >
-                                            {/* <KakaoAddrSearchForm handleAddrComplete={handleAddrComplete} handleShowAddrSearch={handleShowAddrSearch} /> */}
                                             <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
                                         </Drawer>
                                     </div>
                                 </div>
                                 <div>
-                                    <small>{selectedAddr ? `${selectedAddr.name}, ${selectedAddr.formatted_address}` : '추가된 위치 없음.'}</small>
-                                    {/* <KakaoMap mapCenter={mapCenter} /> */}
+                                    <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
                                     <GoogleMaps mapCenter={mapCenter}/>
                                 </div>
                             </DialogContentsDiv>
