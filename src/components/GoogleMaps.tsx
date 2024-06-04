@@ -1,4 +1,4 @@
-import { LoadScript, GoogleMap, MarkerF, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, MarkerF, useLoadScript } from '@react-google-maps/api';
 
 interface GoogleMapsInterface {
     mapCenter: {
@@ -17,14 +17,12 @@ const GoogleMaps: React.FC<GoogleMapsInterface> = ({ mapCenter }) => {
         libraries,
     });
 
-    if (!isLoaded) return <div>Loading...</div>;
+    if (!isLoaded) return <div className="text-center">Loading...</div>;
 
     return (
-        // <LoadScript googleMapsApiKey={googleMapApikey} libraries={libraries}>
-            <GoogleMap mapContainerStyle={{ height: "150px" }} center={mapCenter} zoom={10}>
-                <MarkerF position={mapCenter} />
-            </GoogleMap>
-        // </LoadScript>
+        <GoogleMap mapContainerStyle={{ height: "150px" }} center={mapCenter} zoom={10}>
+            <MarkerF position={mapCenter} />
+        </GoogleMap>
     )
 }
 

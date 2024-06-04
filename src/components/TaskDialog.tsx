@@ -346,7 +346,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             colorName: openColorBar.colorName,
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
-            display: 'block'
+            display: 'block',
+            lat: mapCenter.lat,
+            lng: mapCenter.lng,
+            locationName: selectedAddr,
         };
 
         addNewTodoList(newToDo);
@@ -377,7 +380,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         if (isAllday) {
             updatedStartDateValue = selectedDateEventInfo.start.split('T')[0];
-            // updatedEndDateValue = dayjs(dayjs(selectedDateEventInfo.end.split('T')[0]).add(1, 'day')).format('YYYY-MM-DD');
             updatedEndDateValue = dayjs(dayjs((toDoValueRef.current.end as HTMLInputElement).value).add(1, 'day')).format('YYYY-MM-DD');
         } else {
             updatedStartDateValue = `${selectedDateEventInfo.start.split('T')[0]}T${selectedTime.startTime}`;
@@ -394,7 +396,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             colorName: openColorBar.colorName,
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
-            display: 'block'
+            display: 'block',
+            lat: mapCenter.lat,
+            lng: mapCenter.lng,
+            locationName: selectedAddr,
         };
 
         updateTaskInfo(updatedToDo);
@@ -428,7 +433,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         getSelectedEventInfo(taskId);
     };
-    // 주소 & 위치 데이터  일정 수정 저장에도 추가하기
+    
     return (
         <Dialog
             open={isOpen}
