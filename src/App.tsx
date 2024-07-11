@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './store/store';
+import { modalAction } from './store/modalSlice';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -15,7 +18,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
-import KakaoAddrSearchForm from './components/KakaoAddrSearchForm';
+// import KakaoAddrSearchForm from './components/KakaoAddrSearchForm';
 
 import Box from '@mui/material/Box';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -51,6 +54,11 @@ interface CustomAlertInterface {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const openModal = useSelector((state:RootState) => state.modal.isOpen);
+  const showAddArea = useSelector((state:RootState) => state.modal.isAddArea);
+  const showTodoButton = useSelector((state:RootState) => state.modal.isTodoButton);
+
   const calendarHeight: CssDimValue = '92%';
   const defaultStartDate: string = new Date().toISOString();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -239,6 +247,10 @@ function App() {
     setIsOpen(false);
     setIsAddArea(false);
     setIsTodoButton(false);
+
+    dispatch(modalAction.handleModal(false));
+    dispatch(modalAction.handleAddArea(false));
+    dispatch(modalAction.handleIsTodoButton(false));
   };
 
   const getSelectedEventInfo = (id: string) => {
