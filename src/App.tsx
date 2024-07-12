@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { modalAction } from './store/modalSlice';
+import { dateAction } from './store/dateSlice';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -58,6 +59,8 @@ function App() {
   const openModal = useSelector((state:RootState) => state.modal.isOpen);
   const showAddArea = useSelector((state:RootState) => state.modal.isAddArea);
   const showTodoButton = useSelector((state:RootState) => state.modal.isTodoButton);
+  const selectedDateRedux = useSelector((state:RootState) => state.date.selectedDate);
+  const selectedDateEventListRedux = useSelector((state:RootState) => state.date.selectedDateEventList);
 
   const calendarHeight: CssDimValue = '92%';
   const defaultStartDate: string = new Date().toISOString();
@@ -78,10 +81,6 @@ function App() {
     lng: 126.9780,
     locationName: ''
   });
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isAddArea, setIsAddArea] = useState<boolean>(false);
-  const [isTodoButton, setIsTodoButton] = useState<boolean>(false);
 
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
     isShow: false,
@@ -211,13 +210,29 @@ function App() {
   };
 
   const dateClickEvt = (arg: DateClickArg) => {
+    const todoEventList = arg.view.calendar.getEvents().map((event: EventApi) => {
+      return {
+        id: event.id,
+        allDay: event.allDay,
+        startStr: event.startStr,
+        endStr: event.endStr,
+        title: event.title,
+        backgroundColor: event.backgroundColor
+      };
+    });
+
+    dispatch(dateAction.dateClickEvt({
+      dateStr: arg.dateStr,
+      selectedDateEvt: todoEventList,
+    }));
+
     const selectedDateEvt = arg.view.calendar.getEvents().filter((event: EventApi) => {
       if (!event.allDay) {
         return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr <= dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
       } else {
         return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr < dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
       }
-    })
+    });
 
     setSelectedDateEventList(selectedDateEvt);
 
@@ -240,17 +255,7 @@ function App() {
       }
     });
 
-    setIsOpen(true);
-  };
-
-  const closeTodoModal = () => {
-    setIsOpen(false);
-    setIsAddArea(false);
-    setIsTodoButton(false);
-
-    dispatch(modalAction.handleModal(false));
-    dispatch(modalAction.handleAddArea(false));
-    dispatch(modalAction.handleIsTodoButton(false));
+    dispatch(modalAction.handleModal(true));
   };
 
   const getSelectedEventInfo = (id: string) => {
@@ -333,8 +338,9 @@ function App() {
 
   const searchResultClickEvt = (id: string) => {
     getSelectedEventInfo(id);
-    setIsAddArea(true);
-    setIsOpen(true);
+
+    dispatch(modalAction.handleAddArea(true));
+    dispatch(modalAction.handleModal(true));
   };
 
   const todoButtonEvt = () => {
@@ -358,9 +364,10 @@ function App() {
     });
 
     setSelectedEventInfoDefault();
-    setIsTodoButton(true);
-    setIsAddArea(true);
-    setIsOpen(true);
+
+    dispatch(modalAction.handleIsTodoButton(true));
+    dispatch(modalAction.handleAddArea(true));
+    dispatch(modalAction.handleModal(true));
   };
 
   const getImportantTodoList = () => {
@@ -381,9 +388,7 @@ function App() {
 
   return (
     <>
-      {isOpen && <TodoDialog
-        isOpen={isOpen}
-        closeTodoModal={closeTodoModal}
+      {openModal && <TodoDialog
         selectedDate={selectedDate}
         addNewTodoList={addNewTodoList}
         updateTaskInfo={updateTaskInfo}
@@ -395,10 +400,7 @@ function App() {
         setSelectedEventInfoDefault={setSelectedEventInfoDefault}
         handleShowAlert={handleShowAlert}
         showAlert={showAlert}
-        isAddArea={isAddArea}
-        setIsAddArea={setIsAddArea}
         showSearchForm={showSearchForm}
-        isTodoButton={isTodoButton}
         bottomMenu={bottomMenu}
       />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">

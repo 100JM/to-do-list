@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store/store';
+import { modalAction } from '../store/modalSlice';
 
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
@@ -31,8 +34,6 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare, faMapLocationDot, faMagnifyingGlass, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
-    isOpen: boolean;
-    closeTodoModal: () => void;
     selectedDate: {
         id: string,
         title: string,
@@ -76,10 +77,7 @@ interface TodoDialogInterface {
         alertText: string,
         alertType: 'error' | 'warning' | 'info' | 'success'
     };
-    isAddArea: boolean;
-    setIsAddArea: (show: boolean) => void;
     showSearchForm: boolean;
-    isTodoButton: boolean;
     bottomMenu: string;
 }
 
@@ -112,8 +110,6 @@ interface DateData {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({
-    isOpen,
-    closeTodoModal,
     selectedDate,
     addNewTodoList,
     updateTaskInfo,
@@ -125,12 +121,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     setSelectedEventInfoDefault,
     handleShowAlert,
     showAlert,
-    isAddArea,
-    setIsAddArea,
     showSearchForm,
-    isTodoButton,
     bottomMenu,
 }) => {
+    const dispatch = useDispatch();
+    const openModal = useSelector((state:RootState) => state.modal.isOpen);
+    const showAddArea = useSelector((state:RootState) => state.modal.isAddArea);
+    const showTodoButton = useSelector((state:RootState) => state.modal.isTodoButton);
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -153,7 +150,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
     useEffect(() => {
         setDialogDate(selectedDate.start);
-    }, []);
+    }, [selectedDate]);
 
     const dateRef = useRef<HTMLDivElement | null>(null);
     const timeRef = useRef<HTMLDivElement | null>(null);
@@ -209,6 +206,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         }
 
     }, [selectedDateEventInfo.id]);
+
+    const handleCloseModal = () => {
+        dispatch(modalAction.handleModal(false));
+        dispatch(modalAction.handleAddArea(false));
+        dispatch(modalAction.handleIsTodoButton(false));
+    }
 
     const handleShowAddrSearch = (isShow: boolean) => {
         setShowAddrSearch(isShow);
@@ -354,7 +357,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
         addNewTodoList(newToDo);
 
-        closeTodoModal();
+        handleCloseModal();
 
         handleShowAlert(true, '일정이 등록되었습니다.', 'success');
     };
@@ -405,7 +408,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         updateTaskInfo(updatedToDo);
         setSelectedEventInfoDefault();
 
-        closeTodoModal();
+        handleCloseModal();
 
         handleShowAlert(true, '일정이 수정되었습니다.', 'success');
     };
@@ -414,7 +417,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         if (confirm('해당 일정이 완전히 삭제됩니다.')) {
             deleteTaskInfo(id);
 
-            closeTodoModal();
+            handleCloseModal();
 
             handleShowAlert(true, '일정이 삭제되었습니다.', 'success');
         } else {
@@ -423,30 +426,30 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     }
 
     const handleAddArea = () => {
-        setIsAddArea(!isAddArea);
+        dispatch(modalAction.handleAddArea(!showAddArea));
 
         setSelectedEventInfoDefault();
     };
 
     const handleUpdateTask = (taskId: string) => {
-        setIsAddArea(!isAddArea);
+        dispatch(modalAction.handleAddArea(!showAddArea));
 
         getSelectedEventInfo(taskId);
     };
     
     return (
         <Dialog
-            open={isOpen}
-            onClose={closeTodoModal}
+            open={openModal}
+            onClose={handleCloseModal}
             maxWidth="md"
             fullWidth={true}
         >
-            {!isAddArea &&
+            {!showAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
                         <span className="text-sm font-semibold" style={{ color: "#1a252f" }}>{dayjs(dialogDate).format('YYYY년 MM월 DD일 dddd')}</span>
                         <div>
-                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={closeTodoModal}>
+                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={handleCloseModal}>
                                 <FontAwesomeIcon icon={faCircleXmark as IconProp} />
                             </button>
                             <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={handleAddArea}>
@@ -468,11 +471,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                     </DialogContent>
                 </>
             }
-            {isAddArea &&
+            {showAddArea &&
                 <>
                     <DialogTitle className="flex justify-between items-center">
-                        {(showSearchForm || isTodoButton || (bottomMenu === 'importantTodo')) ?
-                            <IconButton aria-label="delete" size="large" onClick={closeTodoModal} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
+                        {(showSearchForm || showTodoButton || (bottomMenu === 'importantTodo')) ?
+                            <IconButton aria-label="delete" size="large" onClick={handleCloseModal} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
                                 <CloseIcon />
                             </IconButton>
                             :
