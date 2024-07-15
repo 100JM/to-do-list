@@ -57,11 +57,8 @@ interface CustomAlertInterface {
 function App() {
   const dispatch = useDispatch();
   const openModal = useSelector((state:RootState) => state.modal.isOpen);
-  const showAddArea = useSelector((state:RootState) => state.modal.isAddArea);
-  const showTodoButton = useSelector((state:RootState) => state.modal.isTodoButton);
-  const selectedDateRedux = useSelector((state:RootState) => state.date.selectedDate);
-  const selectedDateEventListRedux = useSelector((state:RootState) => state.date.selectedDateEventList);
-
+  const myTodoList = useSelector((state:RootState) => state.date.todoList);
+  console.log(myTodoList);
   const calendarHeight: CssDimValue = '92%';
   const defaultStartDate: string = new Date().toISOString();
   const searchInputRef = useRef<HTMLInputElement | null>(null);

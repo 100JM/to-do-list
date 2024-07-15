@@ -38,6 +38,7 @@ type DateState = {
     selectedDate: SelectedDateInterface;
     selectedDateEventInfo: SelectedDateInterface;
     selectedDateEventList: Array<any>;
+    todoList: Array<any>;
 };
 
 const defaultStartDate: string = new Date().toISOString();
@@ -74,6 +75,57 @@ const initDateState: DateState = {
         locationName: ''
     },
     selectedDateEventList: [],
+    todoList: [
+        {
+            id: '1',
+            title: 'Aevent',
+            start: '2024-06-08T09:00',
+            end: '2024-06-09T18:00',
+            color: '#3788d8',
+            colorName: '워터블루',
+            allDay: false,
+            important: false,
+            display: "block"
+        },
+        {
+            id: '2',
+            title: 'Cevent',
+            start: '2024-06-10T09:00',
+            end: '2024-06-10T10:00',
+            color: '#3788d8',
+            colorName: '워터블루',
+            allDay: false,
+            important: true,
+            description: '테스트입니다.',
+            display: "block"
+        },
+        {
+            id: '3',
+            title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
+            start: '2024-06-10',
+            end: '2024-06-11',
+            color: '#FA8072',
+            colorName: '살몬',
+            allDay: true,
+            important: false,
+            description: '조정 작업 완료',
+            display: "block"
+        },
+        {
+            id: '4',
+            title: '여행',
+            start: '2024-06-14',
+            end: '2024-06-20',
+            color: '#FA8072',
+            colorName: '살몬',
+            allDay: true,
+            important: true,
+            display: "block",
+            lat: 12.2529152,
+            lng: 109.1899018,
+            locationName: '냐짱, 베트남 칸호아 냐짱'
+        }
+    ]
 };
 
 const dateSlice = createSlice({
