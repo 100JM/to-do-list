@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import dayjs from 'dayjs';
-import { DateClickArg } from '@fullcalendar/interaction';
-import { EventApi } from '@fullcalendar/core/index.js';
 
 interface SelectedDateInterface {
     id: string;
@@ -39,6 +37,8 @@ type DateState = {
     selectedDateEventInfo: SelectedDateInterface;
     selectedDateEventList: Array<any>;
     todoList: Array<any>;
+    searchedToDoList: Array<any>;
+    importantEventList: Array<any>;
 };
 
 const defaultStartDate: string = new Date().toISOString();
@@ -90,8 +90,8 @@ const initDateState: DateState = {
         {
             id: '2',
             title: 'Cevent',
-            start: '2024-06-10T09:00',
-            end: '2024-06-10T10:00',
+            start: '2024-07-10T09:00',
+            end: '2024-07-19T10:00',
             color: '#3788d8',
             colorName: '워터블루',
             allDay: false,
@@ -102,12 +102,12 @@ const initDateState: DateState = {
         {
             id: '3',
             title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
-            start: '2024-06-10',
-            end: '2024-06-11',
+            start: '2024-07-10',
+            end: '2024-07-20',
             color: '#FA8072',
             colorName: '살몬',
             allDay: true,
-            important: false,
+            important: true,
             description: '조정 작업 완료',
             display: "block"
         },
@@ -125,7 +125,9 @@ const initDateState: DateState = {
             lng: 109.1899018,
             locationName: '냐짱, 베트남 칸호아 냐짱'
         }
-    ]
+    ],
+    searchedToDoList: [],
+    importantEventList: [],
 };
 
 const dateSlice = createSlice({
@@ -160,7 +162,45 @@ const dateSlice = createSlice({
                 lng: 126.9780,
                 locationName: ''
             };
-        }
+        },
+        getSelectedEventInfo: (state, action) => {
+            state.selectedDateEventInfo = state.todoList.find((t) => {
+                return t.id === action.payload;
+            })
+        },
+        searchToDoEvt: (state, action) => {
+            const keyword = action.payload.replace(/\s/g, '');
+
+            state.searchedToDoList = state.todoList.filter((t) => {
+                if (keyword) {
+                    if (t.title?.replace(/\s/g, '').includes(keyword) || t.description?.replace(/\s/g, '').includes(keyword)) {
+                        return t;
+                    }
+                }
+            });
+        },
+        getImportantTodoList: (state) => {
+            state.importantEventList = state.todoList.filter((t) => {
+                return t.important === true;
+            }).sort((a, b) => {
+                const dateA = new Date(a.end.split('T')[0]);
+                const dateB = new Date(b.end.split('T')[0]);
+
+                return dateA.getTime() - dateB.getTime();
+            });
+        },
+        addNewTodo: (state, action: PayloadAction<object>) => {
+            state.todoList.push(action.payload);
+        },
+        updateTodo: (state, action: PayloadAction<SelectedDateInterface>) => {
+            state.todoList = state.todoList.map((i) => {
+                if(i.id === action.payload.id) {
+                    return action.payload;
+                }
+
+                return i;
+            })
+        },
     },
 });
 

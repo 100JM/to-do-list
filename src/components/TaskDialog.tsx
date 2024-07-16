@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { modalAction } from '../store/modalSlice';
+import { dateAction } from '../store/dateSlice';
 
 import DialogContentsDiv from './DialogContentsDiv';
 import TaskColor from './TaskColor';
@@ -125,9 +126,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     bottomMenu,
 }) => {
     const dispatch = useDispatch();
-    const openModal = useSelector((state:RootState) => state.modal.isOpen);
-    const showAddArea = useSelector((state:RootState) => state.modal.isAddArea);
-    const showTodoButton = useSelector((state:RootState) => state.modal.isTodoButton);
+    const openModal = useSelector((state: RootState) => state.modal.isOpen);
+    const showAddArea = useSelector((state: RootState) => state.modal.isAddArea);
+    const showTodoButton = useSelector((state: RootState) => state.modal.isTodoButton);
+    const selectedDateInfo = useSelector((state: RootState) => state.date.selectedDate);
+    const selectedDateEvtInfo = useSelector((state: RootState) => state.date.selectedDateEventInfo);
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -156,56 +159,78 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const timeRef = useRef<HTMLDivElement | null>(null);
     const toDoValueRef = useRef<ToDoValueRefs>({});
     let dateData: DateData = {
-        id: (selectedDateEventInfo.id ? selectedDateEventInfo.id : selectedDate.id),
-        title: (selectedDateEventInfo.id ? selectedDateEventInfo.title : selectedDate.title),
-        allDay: (selectedDateEventInfo.id ? selectedDateEventInfo.allDay : selectedDate.allDay),
-        start: (selectedDateEventInfo.id ? selectedDateEventInfo.start : selectedDate.start),
-        end: (selectedDateEventInfo.id ? selectedDateEventInfo.end : selectedDate.end),
-        color: (selectedDateEventInfo.id ? selectedDateEventInfo.color : selectedDate.color),
-        colorName: (selectedDateEventInfo.id ? selectedDateEventInfo.colorName : selectedDate.colorName),
-        description: (selectedDateEventInfo.id ? selectedDateEventInfo.description : selectedDate.description),
-        important: (selectedDateEventInfo.id ? selectedDateEventInfo.important : selectedDate.important),
+        id: (selectedDateEvtInfo.id ? selectedDateEvtInfo.id : selectedDateInfo.id),
+        title: (selectedDateEvtInfo.id ? selectedDateEvtInfo.title : selectedDateInfo.title),
+        allDay: (selectedDateEvtInfo.id ? selectedDateEvtInfo.allDay : selectedDateInfo.allDay),
+        start: (selectedDateEvtInfo.id ? selectedDateEvtInfo.start : selectedDateInfo.start),
+        end: (selectedDateEvtInfo.id ? selectedDateEvtInfo.end : selectedDateInfo.end),
+        color: (selectedDateEvtInfo.id ? selectedDateEvtInfo.color : selectedDateInfo.color),
+        colorName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.colorName : selectedDateInfo.colorName),
+        description: (selectedDateEvtInfo.id ? selectedDateEvtInfo.description : selectedDateInfo.description),
+        important: (selectedDateEvtInfo.id ? selectedDateEvtInfo.important : selectedDateInfo.important),
         display: 'block',
-        lat: (selectedDateEventInfo.id ? selectedDateEventInfo.lat : mapCenter.lat),
-        lng: (selectedDateEventInfo.id ? selectedDateEventInfo.lng : mapCenter.lng),
-        locationName: (selectedDateEventInfo.id ? selectedDateEventInfo.locationName : selectedDate.locationName),
+        lat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lat : mapCenter.lat),
+        lng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lng : mapCenter.lng),
+        locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : selectedDate.locationName),
     };
 
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
-            selectedColor: (selectedDateEventInfo.id ? selectedDateEventInfo.color : selectedDate.color),
-            colorName: (selectedDateEventInfo.id ? selectedDateEventInfo.colorName : selectedDate.colorName)
+            // selectedColor: (selectedDateEventInfo.id ? selectedDateEventInfo.color : selectedDate.color),
+            selectedColor: dateData.color,
+            // colorName: (selectedDateEventInfo.id ? selectedDateEventInfo.colorName : selectedDate.colorName)
+            colorName: dateData.colorName
         }));
 
-        if (selectedDateEventInfo.id) {
-            setIsAllday(selectedDateEventInfo.allDay);
-            setMapCenter((prev) => {
-                return {
-                    ...prev,
-                    lat: (selectedDateEventInfo.lat ? selectedDateEventInfo.lat : mapCenter.lat),
-                    lng: (selectedDateEventInfo.lng ? selectedDateEventInfo.lng : mapCenter.lng),
-                }
-            });
+        setIsAllday(dateData.allDay);
 
-            if(selectedDateEventInfo.locationName !== '') {
-                setSelectedAddr(selectedDateEventInfo.locationName);
+        setMapCenter((prev) => {
+            return {
+                ...prev,
+                lat: (dateData.lat ? dateData.lat : mapCenter.lat),
+                lng: (dateData.lng ? dateData.lng : mapCenter.lng),
             }
-        } else {
-            setIsAllday(selectedDate.allDay);
-        }
+        });
 
-        if (selectedDateEventInfo.id && !selectedDateEventInfo.allDay) {
+        if (!dateData.allDay) {
             setSelectedTime((prevTime) => {
                 return {
                     ...prevTime,
-                    startTime: selectedDateEventInfo.start.split('T')[1],
-                    endTime: selectedDateEventInfo.end.split('T')[1]
+                    startTime: dateData.start.split('T')[1],
+                    endTime: dateData.end.split('T')[1]
                 }
-            })
+            });
         }
 
-    }, [selectedDateEventInfo.id]);
+        // if (selectedDateEventInfo.id) {
+        //     setIsAllday(selectedDateEventInfo.allDay);
+        //     setMapCenter((prev) => {
+        //         return {
+        //             ...prev,
+        //             lat: (selectedDateEventInfo.lat ? selectedDateEventInfo.lat : mapCenter.lat),
+        //             lng: (selectedDateEventInfo.lng ? selectedDateEventInfo.lng : mapCenter.lng),
+        //         }
+        //     });
+
+        //     if(selectedDateEventInfo.locationName !== '') {
+        //         setSelectedAddr(selectedDateEventInfo.locationName);
+        //     }
+        // } else {
+        //     setIsAllday(selectedDate.allDay);
+        // }
+
+        // if (selectedDateEventInfo.id && !selectedDateEventInfo.allDay) {
+        //     setSelectedTime((prevTime) => {
+        //         return {
+        //             ...prevTime,
+        //             startTime: selectedDateEventInfo.start.split('T')[1],
+        //             endTime: selectedDateEventInfo.end.split('T')[1]
+        //         }
+        //     })
+        // }
+
+    }, [dateData.id]);
 
     const handleCloseModal = () => {
         dispatch(modalAction.handleModal(false));
@@ -228,7 +253,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         setMapCenter((prev) => {
             return {
                 ...prev,
-                lat: 37.5665, 
+                lat: 37.5665,
                 lng: 126.9780
             }
         });
@@ -278,6 +303,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         })
     };
 
+    // ref로 변경?
     const handletDate = (name: string, date: Dayjs | null, isUpdate: boolean) => {
         if (date) {
             let formattedDate: string = '';
@@ -382,15 +408,15 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         let updatedEndDateValue: string;
 
         if (isAllday) {
-            updatedStartDateValue = selectedDateEventInfo.start.split('T')[0];
+            updatedStartDateValue = selectedDateEvtInfo.start.split('T')[0];
             updatedEndDateValue = dayjs(dayjs((toDoValueRef.current.end as HTMLInputElement).value).add(1, 'day')).format('YYYY-MM-DD');
         } else {
-            updatedStartDateValue = `${selectedDateEventInfo.start.split('T')[0]}T${selectedTime.startTime}`;
+            updatedStartDateValue = `${selectedDateEvtInfo.start.split('T')[0]}T${selectedTime.startTime}`;
             updatedEndDateValue = `${(toDoValueRef.current.end as HTMLInputElement).value}T${selectedTime.endTime}`;
         }
 
         const updatedToDo: object = {
-            id: selectedDateEventInfo.id,
+            id: selectedDateEvtInfo.id,
             title: (toDoValueRef.current.title as HTMLInputElement).value,
             allDay: (toDoValueRef.current.allDay as HTMLInputElement).checked,
             start: updatedStartDateValue,
@@ -434,9 +460,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const handleUpdateTask = (taskId: string) => {
         dispatch(modalAction.handleAddArea(!showAddArea));
 
-        getSelectedEventInfo(taskId);
+        dispatch(dateAction.getSelectedEventInfo(taskId));
     };
-    
+
     return (
         <Dialog
             open={openModal}
@@ -485,10 +511,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                         }
                         <div className='p-1'>
 
-                            {selectedDateEventInfo.id ?
+                            {selectedDateEvtInfo.id ?
                                 <>
                                     <button className="p-2">
-                                        <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} onClick={() => deleteTask(selectedDateEventInfo.id)} />
+                                        <FontAwesomeIcon icon={faTrash as IconProp} style={{ color: openColorBar.selectedColor }} onClick={() => deleteTask(selectedDateEvtInfo.id)} />
                                     </button>
                                     <button className="p-2">
                                         <FontAwesomeIcon icon={faPenToSquare as IconProp} style={{ color: openColorBar.selectedColor }} onClick={updateTask} />
@@ -671,7 +697,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                 </div>
                                 <div>
                                     <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
-                                    <GoogleMaps mapCenter={mapCenter}/>
+                                    <GoogleMaps mapCenter={mapCenter} />
                                 </div>
                             </DialogContentsDiv>
                             <DialogContentsDiv>

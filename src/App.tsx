@@ -56,9 +56,11 @@ interface CustomAlertInterface {
 
 function App() {
   const dispatch = useDispatch();
-  const openModal = useSelector((state:RootState) => state.modal.isOpen);
-  const myTodoList = useSelector((state:RootState) => state.date.todoList);
-  console.log(myTodoList);
+  const openModal = useSelector((state: RootState) => state.modal.isOpen);
+  const myTodoList = useSelector((state: RootState) => state.date.todoList);
+  const searchedmyTodoList = useSelector((state: RootState) => state.date.searchedToDoList);
+  const importantMyTodoList = useSelector((state:RootState) => state.date.importantEventList);
+
   const calendarHeight: CssDimValue = '92%';
   const defaultStartDate: string = new Date().toISOString();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -74,7 +76,7 @@ function App() {
     description: '',
     important: false,
     display: 'block',
-    lat: 37.5665, 
+    lat: 37.5665,
     lng: 126.9780,
     locationName: ''
   });
@@ -100,7 +102,7 @@ function App() {
     description: '',
     important: false,
     display: 'block',
-    lat: 37.5665, 
+    lat: 37.5665,
     lng: 126.9780,
     locationName: ''
   });
@@ -164,13 +166,13 @@ function App() {
 
   useEffect(() => {
     if (showSearchForm) {
-      searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
+      // searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
+      dispatch(dateAction.searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : ''));
     }
 
-    // if (bottomMenu === 'importantTodo') {
-    getImportantTodoList();
-    // }
-  }, [toDoList]);
+    // getImportantTodoList();
+    dispatch(dateAction.getImportantTodoList());
+  }, [toDoList, showSearchForm]);
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
     if (newValue !== 'todo') {
@@ -180,6 +182,7 @@ function App() {
 
   const addNewTodoList = (newToDo: object) => {
     setToDoList((prevList) => [...prevList, newToDo]);
+    dispatch(dateAction.addNewTodo(newToDo));
   }
 
   const updateTaskInfo = (taskInfo: any) => {
@@ -190,6 +193,8 @@ function App() {
 
       return i;
     }));
+    
+    dispatch(dateAction.updateTodo(taskInfo));
   };
 
   const deleteTaskInfo = (taskId: string) => {
@@ -246,7 +251,7 @@ function App() {
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665, 
+        lat: 37.5665,
         lng: 126.9780,
         locationName: ''
       }
@@ -301,7 +306,7 @@ function App() {
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665, 
+        lat: 37.5665,
         lng: 126.9780,
         locationName: ''
       }
@@ -334,7 +339,8 @@ function App() {
   };
 
   const searchResultClickEvt = (id: string) => {
-    getSelectedEventInfo(id);
+    // getSelectedEventInfo(id);
+    dispatch(dateAction.getSelectedEventInfo(id));
 
     dispatch(modalAction.handleAddArea(true));
     dispatch(modalAction.handleModal(true));
@@ -354,7 +360,7 @@ function App() {
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665, 
+        lat: 37.5665,
         lng: 126.9780,
         locationName: ''
       }
@@ -377,12 +383,12 @@ function App() {
 
   const desktopMenuEvt = (value: string) => {
     if (value === 'importantTodo') {
-      getImportantTodoList();
+      dispatch(dateAction.getImportantTodoList());
     }
 
     setBottomMenu(value);
   }
-
+  
   return (
     <>
       {openModal && <TodoDialog
@@ -428,7 +434,7 @@ function App() {
                   right: 'searchButton',
                 }}
                 dateClick={dateClickEvt}
-                events={toDoList}
+                events={myTodoList}
                 displayEventTime={false}
                 timeZone='UTC'
               />
@@ -439,54 +445,54 @@ function App() {
                 <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
                 <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
                   {
-                    importantEventList.sort((a, b) => {
-                      const dateA = new Date(a.end.split('T')[0]);
-                      const dateB = new Date(b.end.split('T')[0]);
+                    (importantMyTodoList.length > 0) ?
+                    importantMyTodoList.map((i) => {
+                        const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                        const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
 
-                      return dateA.getTime() - dateB.getTime();
-                    }).map((i) => {
-                      const importantEndDate:string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
-                      const importantEndDday:number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
-                      
-                      return (
-                        <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
-                          <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
-                          <div className="w-full">
-                            <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
-                            <div>{`시작일 ${i.start.split('T')[0]}`}</div>
-                            <div className="flex justify-between">
-                              <div>{`종료일 ${importantEndDate}`}</div>
-                              <div>
-                                {
-                                  (importantEndDday > 0) ?
-                                    (
-                                      (importantEndDday <= 3) ?
-                                        <>
-                                          <i className="bi bi-alarm text-red-500">
-                                            {` D-day ${importantEndDday}일`}
-                                          </i>
-                                        </>
-                                        :
-                                        ` D-day ${importantEndDday}일`
-                                    )
-                                    :
-                                    (
-                                      (importantEndDday === 0) ?
-                                        <>
-                                          <i className="bi bi-alarm text-red-500">
-                                            {'D-day 오늘'}
-                                          </i>
-                                        </>
-                                        :
-                                        '종료된 일정'
-                                    )
-                                }
+                        return (
+                          <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
+                            <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
+                            <div style={{width: "calc(100% - 1.5rem)"}}>
+                              <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
+                              <div>{`시작일 ${i.start.split('T')[0]}`}</div>
+                              <div className="flex justify-between">
+                                <div>{`종료일 ${importantEndDate}`}</div>
+                                <div>
+                                  {
+                                    (importantEndDday > 0) ?
+                                      (
+                                        (importantEndDday <= 3) ?
+                                          <>
+                                            <i className="bi bi-alarm text-red-500">
+                                              {` D-day ${importantEndDday}일`}
+                                            </i>
+                                          </>
+                                          :
+                                          ` D-day ${importantEndDday}일`
+                                      )
+                                      :
+                                      (
+                                        (importantEndDday === 0) ?
+                                          <>
+                                            <i className="bi bi-alarm text-red-500">
+                                              {'D-day 오늘'}
+                                            </i>
+                                          </>
+                                          :
+                                          '종료된 일정'
+                                      )
+                                  }
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })
+                        )
+                      })
+                      :
+                      <div className="w-full h-full flex items-center justify-center text-base">
+                        등록된 중요 일정이 없습니다.
+                      </div>
                   }
                 </div>
               </>
@@ -511,9 +517,12 @@ function App() {
                 key="importantTodo"
                 icon={
                   <Badge badgeContent={
-                    importantEventList.filter((i) => {
+                    importantMyTodoList.filter((i) => {
+                      const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                      const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
+
                       return (
-                        dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3 && dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') >= 0
+                        importantEndDday >= 0 && importantEndDday <= 3
                       )
                     }).length
                   }
@@ -554,9 +563,12 @@ function App() {
                   value="importantTodo"
                   icon={
                     <Badge badgeContent={
-                      importantEventList.filter((i) => {
+                      importantMyTodoList.filter((i) => {
+                        const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                        const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
+  
                         return (
-                          dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') <= 3 && dayjs(i.end.split('T')[0]).diff(dayjs(), 'day') >= 0
+                          importantEndDday >= 0 && importantEndDday <= 3
                         )
                       }).length
                     }
@@ -564,7 +576,7 @@ function App() {
                       <PushPinIcon />
                     </Badge>
                   }
-                  onClick={getImportantTodoList}
+                  onClick={() => dispatch(dateAction.getImportantTodoList())}
                 />
               </BottomNavigation>
             </Box>
@@ -583,24 +595,24 @@ function App() {
             </div>
             <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
               <SearchIcon />
-              <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => searchToDoEvt(e.target.value)} />
+              <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => dispatch(dateAction.searchToDoEvt(e.target.value))} />
             </div>
             <div className="w-full overflow-y-auto" style={{ height: "calc(100% - 5.55rem)" }}>
               {
-                searchedToDoList.length === 0 && !searchInputRef.current?.value &&
+                searchedmyTodoList.length === 0 && !searchInputRef.current?.value &&
                 <div className="w-full h-full flex justify-center items-center text-gray-400">
                   <span>키워드를 입력하세요.</span>
                 </div>
               }
               {
-                searchedToDoList.length === 0 && searchInputRef.current?.value &&
+                searchedmyTodoList.length === 0 && searchInputRef.current?.value &&
                 <div className="w-full h-full flex justify-center items-center text-gray-400">
                   <span>검색 결과가 없습니다.</span>
                 </div>
               }
               {
-                searchedToDoList.length > 0 && searchInputRef.current?.value &&
-                searchedToDoList.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())).map((t) => {
+                searchedmyTodoList.length > 0 && searchInputRef.current?.value &&
+                searchedmyTodoList.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())).map((t) => {
                   return (
                     <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
                       <div className="w-full h-full">
