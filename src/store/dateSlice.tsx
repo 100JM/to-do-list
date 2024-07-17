@@ -134,6 +134,23 @@ const dateSlice = createSlice({
     name: 'date',
     initialState: initDateState,
     reducers: {
+        setSelectedDate: (state) => {
+            state.selectedDate = {
+                id: '',
+                title: '',
+                allDay: true,
+                start: defaultStartDate,
+                end: defaultStartDate,
+                color: '#3788d8',
+                colorName: '워터블루',
+                description: '',
+                important: false,
+                display: 'block',
+                lat: 37.5665,
+                lng: 126.9780,
+                locationName: ''
+            }
+        },
         dateClickEvt: (state, action: PayloadAction<DateClickInterface>) => {
             state.selectedDateEventList = action.payload.selectedDateEvt.filter((event) => {
                 if (!event.allDay) {
@@ -177,7 +194,7 @@ const dateSlice = createSlice({
                         return t;
                     }
                 }
-            });
+            }).sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
         },
         getImportantTodoList: (state) => {
             state.importantEventList = state.todoList.filter((t) => {
@@ -201,6 +218,14 @@ const dateSlice = createSlice({
                 return i;
             })
         },
+        deleteTodo: (state, action) => {
+            state.todoList = state.todoList.filter((t) => {
+                return t.id !== action.payload;
+            });
+        },
+        setSelectedEventInfoDefault: (state, action: PayloadAction<SelectedDateInterface>) => {
+            state.selectedDateEventInfo = action.payload;
+        }
     },
 });
 

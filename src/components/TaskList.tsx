@@ -2,11 +2,10 @@ import { useSelector } from "react-redux";
 import { RootState } from '../store/store';
 
 interface TaskListInterface {
-    taskData:Array<any>,
     handleUpdateTask:(taskId:string) => void;
 }
 
-const TaskList: React.FC<TaskListInterface> = ({taskData, handleUpdateTask}) => {
+const TaskList: React.FC<TaskListInterface> = ({handleUpdateTask}) => {
     const selectedDateEventList = useSelector((state:RootState) => state.date.selectedDateEventList);
     
     return (

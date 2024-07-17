@@ -32,22 +32,6 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 
-interface SelectedDateInterface {
-  id: string;
-  title: string;
-  allDay: boolean;
-  start: string;
-  end: string;
-  color: string;
-  colorName: string;
-  description: string;
-  important: boolean;
-  display: string;
-  lat: number;
-  lng: number;
-  locationName: string;
-}
-
 interface CustomAlertInterface {
   isShow: boolean;
   alertText: string;
@@ -62,15 +46,14 @@ function App() {
   const importantMyTodoList = useSelector((state:RootState) => state.date.importantEventList);
 
   const calendarHeight: CssDimValue = '92%';
-  const defaultStartDate: string = new Date().toISOString();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [selectedDate, setSelectedDate] = useState<SelectedDateInterface>({
+  const eventDefaultValue = {
     id: '',
     title: '',
     allDay: true,
-    start: defaultStartDate,
-    end: defaultStartDate,
+    start: new Date().toISOString(),
+    end: new Date().toISOString(),
     color: '#3788d8',
     colorName: '워터블루',
     description: '',
@@ -79,7 +62,7 @@ function App() {
     lat: 37.5665,
     lng: 126.9780,
     locationName: ''
-  });
+  }
 
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
     isShow: false,
@@ -88,120 +71,22 @@ function App() {
   });
 
   const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
-  const [selectedDateEventList, setSelectedDateEventList] = useState<Array<any>>([]);
-  const [importantEventList, setImportantEventList] = useState<Array<any>>([]);
 
-  const [selectedDateEventInfo, setSelectedDateEventInfo] = useState<SelectedDateInterface>({
-    id: '',
-    title: '',
-    allDay: true,
-    start: defaultStartDate,
-    end: defaultStartDate,
-    color: '#3788d8',
-    colorName: '워터블루',
-    description: '',
-    important: false,
-    display: 'block',
-    lat: 37.5665,
-    lng: 126.9780,
-    locationName: ''
-  });
-
-  const [toDoList, setToDoList] = useState<Array<any>>(
-    [
-      {
-        id: '1',
-        title: 'Aevent',
-        start: '2024-06-08T09:00',
-        end: '2024-06-09T18:00',
-        color: '#3788d8',
-        colorName: '워터블루',
-        allDay: false,
-        important: false,
-        display: "block"
-      },
-      {
-        id: '2',
-        title: 'Cevent',
-        start: '2024-06-10T09:00',
-        end: '2024-06-10T10:00',
-        color: '#3788d8',
-        colorName: '워터블루',
-        allDay: false,
-        important: true,
-        description: '테스트입니다.',
-        display: "block"
-      },
-      {
-        id: '3',
-        title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
-        start: '2024-06-10',
-        end: '2024-06-11',
-        color: '#FA8072',
-        colorName: '살몬',
-        allDay: true,
-        important: false,
-        description: '조정 작업 완료',
-        display: "block"
-      },
-      {
-        id: '4',
-        title: '여행',
-        start: '2024-06-14',
-        end: '2024-06-20',
-        color: '#FA8072',
-        colorName: '살몬',
-        allDay: true,
-        important: true,
-        display: "block",
-        lat: 12.2529152,
-        lng: 109.1899018,
-        locationName: '냐짱, 베트남 칸호아 냐짱'
-      }
-    ]
-  );
-
-  const [searchedToDoList, setSearchedToDoList] = useState<Array<any>>([]);
   const [bottomMenu, setBottomMenu] = useState('calendar');
 
   useEffect(() => {
     if (showSearchForm) {
-      // searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : '');
       dispatch(dateAction.searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : ''));
     }
 
-    // getImportantTodoList();
     dispatch(dateAction.getImportantTodoList());
-  }, [toDoList, showSearchForm]);
+  }, [myTodoList, showSearchForm]);
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
     if (newValue !== 'todo') {
       setBottomMenu(newValue);
     }
   };
-
-  const addNewTodoList = (newToDo: object) => {
-    setToDoList((prevList) => [...prevList, newToDo]);
-    dispatch(dateAction.addNewTodo(newToDo));
-  }
-
-  const updateTaskInfo = (taskInfo: any) => {
-    setToDoList(prevList => prevList.map(i => {
-      if (i.id === taskInfo.id) {
-        return taskInfo;
-      }
-
-      return i;
-    }));
-    
-    dispatch(dateAction.updateTodo(taskInfo));
-  };
-
-  const deleteTaskInfo = (taskId: string) => {
-    setToDoList(prevList => prevList.filter((i) => {
-      return i.id !== taskId;
-    }));
-  }
 
   const searchButtonClickEvt = (isShow: boolean) => {
     setShowSearchForm(isShow);
@@ -228,89 +113,7 @@ function App() {
       selectedDateEvt: todoEventList,
     }));
 
-    const selectedDateEvt = arg.view.calendar.getEvents().filter((event: EventApi) => {
-      if (!event.allDay) {
-        return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr <= dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
-      } else {
-        return dayjs(event.startStr.split('T')[0]).format('YYYY-MM-DD') <= arg.dateStr && arg.dateStr < dayjs(event.endStr.split('T')[0]).format('YYYY-MM-DD');
-      }
-    });
-
-    setSelectedDateEventList(selectedDateEvt);
-
-    setSelectedDate((prevDate) => {
-      return {
-        ...prevDate,
-        id: '',
-        title: '',
-        allDay: true,
-        start: arg.dateStr,
-        end: arg.dateStr,
-        color: '#3788d8',
-        colorName: '워터블루',
-        description: '',
-        important: false,
-        display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
-        locationName: ''
-      }
-    });
-
     dispatch(modalAction.handleModal(true));
-  };
-
-  const getSelectedEventInfo = (id: string) => {
-    const selectedTodo = toDoList.find((t) => {
-      return t.id === id;
-    });
-
-    setSelectedDateEventInfo((prevDate) => {
-      return {
-        ...prevDate,
-        ...selectedTodo
-      }
-    })
-  };
-
-  const setTaskInfo = (name: string, value: string | boolean, isUpdate: boolean) => {
-    if (!isUpdate) {
-      setSelectedDate((prevInfo) => {
-        return {
-          ...prevInfo,
-          [name]: value
-        }
-      });
-    } else {
-      setSelectedDateEventInfo((prevInfo) => {
-        return {
-          ...prevInfo,
-          [name]: value
-        }
-      });
-    }
-
-  };
-
-  const setSelectedEventInfoDefault = () => {
-    setSelectedDateEventInfo((prev) => {
-      return {
-        ...prev,
-        id: '',
-        title: '',
-        allDay: true,
-        start: defaultStartDate,
-        end: defaultStartDate,
-        color: '#3788d8',
-        colorName: '워터블루',
-        description: '',
-        important: false,
-        display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
-        locationName: ''
-      }
-    });
   };
 
   const handleShowAlert = (isShow: boolean, alertText: string, alertType: 'error' | 'warning' | 'info' | 'success') => {
@@ -324,22 +127,7 @@ function App() {
     });
   };
 
-  const searchToDoEvt = (keyWord: string) => {
-    keyWord = keyWord.replace(/\s/g, '');
-
-    const searchResult = toDoList.filter((t) => {
-      if (keyWord) {
-        if (t.title?.replace(/\s/g, '').includes(keyWord) || t.description?.replace(/\s/g, '').includes(keyWord)) {
-          return t;
-        }
-      }
-    });
-
-    setSearchedToDoList(searchResult);
-  };
-
   const searchResultClickEvt = (id: string) => {
-    // getSelectedEventInfo(id);
     dispatch(dateAction.getSelectedEventInfo(id));
 
     dispatch(modalAction.handleAddArea(true));
@@ -347,38 +135,13 @@ function App() {
   };
 
   const todoButtonEvt = () => {
-    setSelectedDate((prevDate) => {
-      return {
-        ...prevDate,
-        id: '',
-        title: '',
-        allDay: true,
-        start: defaultStartDate,
-        end: defaultStartDate,
-        color: '#3788d8',
-        colorName: '워터블루',
-        description: '',
-        important: false,
-        display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
-        locationName: ''
-      }
-    });
+    dispatch(dateAction.setSelectedDate());
 
-    setSelectedEventInfoDefault();
+    dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
 
     dispatch(modalAction.handleIsTodoButton(true));
     dispatch(modalAction.handleAddArea(true));
     dispatch(modalAction.handleModal(true));
-  };
-
-  const getImportantTodoList = () => {
-    const importantTodoList = toDoList.filter((t) => {
-      return t.important === true;
-    });
-
-    setImportantEventList(importantTodoList);
   };
 
   const desktopMenuEvt = (value: string) => {
@@ -392,15 +155,6 @@ function App() {
   return (
     <>
       {openModal && <TodoDialog
-        selectedDate={selectedDate}
-        addNewTodoList={addNewTodoList}
-        updateTaskInfo={updateTaskInfo}
-        deleteTaskInfo={deleteTaskInfo}
-        selectedDateEventList={selectedDateEventList}
-        getSelectedEventInfo={getSelectedEventInfo}
-        setTaskInfo={setTaskInfo}
-        selectedDateEventInfo={selectedDateEventInfo}
-        setSelectedEventInfoDefault={setSelectedEventInfoDefault}
         handleShowAlert={handleShowAlert}
         showAlert={showAlert}
         showSearchForm={showSearchForm}
@@ -612,7 +366,7 @@ function App() {
               }
               {
                 searchedmyTodoList.length > 0 && searchInputRef.current?.value &&
-                searchedmyTodoList.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())).map((t) => {
+                searchedmyTodoList.map((t) => {
                   return (
                     <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
                       <div className="w-full h-full">

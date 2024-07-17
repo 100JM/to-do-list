@@ -35,43 +35,6 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faClockRotateLeft, faThumbTack, faCircleXmark, faCirclePlus, faTrash, faCircleCheck, faPenToSquare, faMapLocationDot, faMagnifyingGlass, faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 
 interface TodoDialogInterface {
-    selectedDate: {
-        id: string,
-        title: string,
-        allDay: boolean,
-        start: string,
-        end: string,
-        color: string,
-        colorName: string,
-        description: string,
-        important: boolean,
-        display: string,
-        lat: number,
-        lng: number,
-        locationName: string
-    };
-    addNewTodoList: (newToDo: object) => void;
-    updateTaskInfo: (taskInfo: object) => void;
-    deleteTaskInfo: (taskId: string) => void;
-    selectedDateEventList: Array<any>;
-    getSelectedEventInfo: (id: string) => void;
-    setTaskInfo: (name: string, value: string | boolean, isUpdate: boolean) => void;
-    selectedDateEventInfo: {
-        id: string,
-        title: string,
-        allDay: boolean,
-        start: string,
-        end: string,
-        color: string,
-        colorName: string,
-        description: string,
-        important: boolean,
-        display: string,
-        lat: number,
-        lng: number,
-        locationName: string
-    };
-    setSelectedEventInfoDefault: () => void;
     handleShowAlert: (isShow: boolean, alertText: string, alertType: 'error' | 'warning' | 'info' | 'success') => void;
     showAlert: {
         isShow: boolean,
@@ -111,15 +74,6 @@ interface DateData {
 const koLocale: string = dayjs.locale('ko');
 
 const TodoDialog: React.FC<TodoDialogInterface> = ({
-    selectedDate,
-    addNewTodoList,
-    updateTaskInfo,
-    deleteTaskInfo,
-    selectedDateEventList,
-    getSelectedEventInfo,
-    setTaskInfo,
-    selectedDateEventInfo,
-    setSelectedEventInfoDefault,
     handleShowAlert,
     showAlert,
     showSearchForm,
@@ -131,6 +85,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const showTodoButton = useSelector((state: RootState) => state.modal.isTodoButton);
     const selectedDateInfo = useSelector((state: RootState) => state.date.selectedDate);
     const selectedDateEvtInfo = useSelector((state: RootState) => state.date.selectedDateEventInfo);
+    const selectedDateEvtList = useSelector((state: RootState) => state.date.selectedDateEventList);
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -152,12 +107,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const [mapCenter, setMapCenter] = useState<{ lat: number, lng: number }>({ lat: 37.5665, lng: 126.9780 });
 
     useEffect(() => {
-        setDialogDate(selectedDate.start);
-    }, [selectedDate]);
+        setDialogDate(selectedDateInfo.start);
+    }, [selectedDateInfo]);
 
     const dateRef = useRef<HTMLDivElement | null>(null);
     const timeRef = useRef<HTMLDivElement | null>(null);
     const toDoValueRef = useRef<ToDoValueRefs>({});
+
     let dateData: DateData = {
         id: (selectedDateEvtInfo.id ? selectedDateEvtInfo.id : selectedDateInfo.id),
         title: (selectedDateEvtInfo.id ? selectedDateEvtInfo.title : selectedDateInfo.title),
@@ -171,15 +127,29 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         display: 'block',
         lat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lat : mapCenter.lat),
         lng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lng : mapCenter.lng),
-        locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : selectedDate.locationName),
+        locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : ''),
     };
+
+    const eventDefaultValue = {
+        id: '',
+        title: '',
+        allDay: true,
+        start: new Date().toISOString(),
+        end: new Date().toISOString(),
+        color: '#3788d8',
+        colorName: '워터블루',
+        description: '',
+        important: false,
+        display: 'block',
+        lat: 37.5665,
+        lng: 126.9780,
+        locationName: ''
+    }
 
     useEffect(() => {
         setOpenColorBar(prevState => ({
             ...prevState,
-            // selectedColor: (selectedDateEventInfo.id ? selectedDateEventInfo.color : selectedDate.color),
             selectedColor: dateData.color,
-            // colorName: (selectedDateEventInfo.id ? selectedDateEventInfo.colorName : selectedDate.colorName)
             colorName: dateData.colorName
         }));
 
@@ -193,6 +163,10 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             }
         });
 
+        if (dateData.locationName !== '') {
+            setSelectedAddr(dateData.locationName);
+        }
+
         if (!dateData.allDay) {
             setSelectedTime((prevTime) => {
                 return {
@@ -202,33 +176,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                 }
             });
         }
-
-        // if (selectedDateEventInfo.id) {
-        //     setIsAllday(selectedDateEventInfo.allDay);
-        //     setMapCenter((prev) => {
-        //         return {
-        //             ...prev,
-        //             lat: (selectedDateEventInfo.lat ? selectedDateEventInfo.lat : mapCenter.lat),
-        //             lng: (selectedDateEventInfo.lng ? selectedDateEventInfo.lng : mapCenter.lng),
-        //         }
-        //     });
-
-        //     if(selectedDateEventInfo.locationName !== '') {
-        //         setSelectedAddr(selectedDateEventInfo.locationName);
-        //     }
-        // } else {
-        //     setIsAllday(selectedDate.allDay);
-        // }
-
-        // if (selectedDateEventInfo.id && !selectedDateEventInfo.allDay) {
-        //     setSelectedTime((prevTime) => {
-        //         return {
-        //             ...prevTime,
-        //             startTime: selectedDateEventInfo.start.split('T')[1],
-        //             endTime: selectedDateEventInfo.end.split('T')[1]
-        //         }
-        //     })
-        // }
 
     }, [dateData.id]);
 
@@ -303,17 +250,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         })
     };
 
-    // ref로 변경?
-    const handletDate = (name: string, date: Dayjs | null, isUpdate: boolean) => {
-        if (date) {
-            let formattedDate: string = '';
-
-            formattedDate = dayjs(date as Dayjs).format(`YYYY-MM-DD`);
-
-            setTaskInfo(name, formattedDate, isUpdate);
-        }
-    };
-
     const handleStartTime = (date: Dayjs | null) => {
         if (date) {
             setSelectedTime((prevTime) => {
@@ -358,11 +294,11 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         let selectEndDateValue: string;
 
         if (isAllday) {
-            selectStartDateValue = selectedDate.start.split('T')[0];
-            selectEndDateValue = dayjs(dayjs(selectedDate.end).add(1, 'day')).format('YYYY-MM-DD');
+            selectStartDateValue = (toDoValueRef.current.start as HTMLInputElement).value;
+            selectEndDateValue = dayjs(dayjs((toDoValueRef.current.end as HTMLInputElement).value).add(1, 'day')).format('YYYY-MM-DD');
         } else {
-            selectStartDateValue = `${selectedDate.start.split('T')[0]}T${selectedTime.startTime}`;
-            selectEndDateValue = `${selectedDate.end.split('T')[0]}T${selectedTime.endTime}`;
+            selectStartDateValue = `${(toDoValueRef.current.start as HTMLInputElement).value}T${selectedTime.startTime}`;
+            selectEndDateValue = `${(toDoValueRef.current.end as HTMLInputElement).value}T${selectedTime.endTime}`;
         }
 
         const newToDo: object = {
@@ -381,7 +317,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             locationName: selectedAddr,
         };
 
-        addNewTodoList(newToDo);
+        dispatch(dateAction.addNewTodo(newToDo));
 
         handleCloseModal();
 
@@ -391,7 +327,6 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const updateTask = () => {
         const checkUpdateDateInput = dateRef.current?.classList.contains('date-error');
         const checkUpdateTimeInput = timeRef.current?.classList.contains('date-error');
-
 
         if (!(toDoValueRef.current.title as HTMLInputElement).value) {
             handleShowAlert(true, '제목을 입력해주세요.', 'warning');
@@ -408,14 +343,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         let updatedEndDateValue: string;
 
         if (isAllday) {
-            updatedStartDateValue = selectedDateEvtInfo.start.split('T')[0];
+            updatedStartDateValue = (toDoValueRef.current.start as HTMLInputElement).value;
             updatedEndDateValue = dayjs(dayjs((toDoValueRef.current.end as HTMLInputElement).value).add(1, 'day')).format('YYYY-MM-DD');
         } else {
-            updatedStartDateValue = `${selectedDateEvtInfo.start.split('T')[0]}T${selectedTime.startTime}`;
+            updatedStartDateValue = `${(toDoValueRef.current.start as HTMLInputElement).value}T${selectedTime.startTime}`;
             updatedEndDateValue = `${(toDoValueRef.current.end as HTMLInputElement).value}T${selectedTime.endTime}`;
         }
 
-        const updatedToDo: object = {
+        const updatedToDo: DateData = {
             id: selectedDateEvtInfo.id,
             title: (toDoValueRef.current.title as HTMLInputElement).value,
             allDay: (toDoValueRef.current.allDay as HTMLInputElement).checked,
@@ -431,8 +366,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             locationName: selectedAddr,
         };
 
-        updateTaskInfo(updatedToDo);
-        setSelectedEventInfoDefault();
+        dispatch(dateAction.updateTodo(updatedToDo));
+
+        dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
 
         handleCloseModal();
 
@@ -441,7 +377,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
 
     const deleteTask = (id: string) => {
         if (confirm('해당 일정이 완전히 삭제됩니다.')) {
-            deleteTaskInfo(id);
+            dispatch(dateAction.deleteTodo(id));
 
             handleCloseModal();
 
@@ -454,7 +390,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const handleAddArea = () => {
         dispatch(modalAction.handleAddArea(!showAddArea));
 
-        setSelectedEventInfoDefault();
+        dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
     };
 
     const handleUpdateTask = (taskId: string) => {
@@ -486,12 +422,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                     <DialogContent>
                         <div className="text-gray-700 mb-4">
                             <DialogContentsDiv>
-                                {!(selectedDateEventList.length > 0) &&
+                                {(selectedDateEvtList.length === 0) &&
                                     <div className="flex items-center justify-center min-h-80">
                                         <span className="text-slate-500">등록된 일정이 없습니다.</span>
                                     </div>
                                 }
-                                {(selectedDateEventList.length > 0) && <TaskList taskData={selectedDateEventList} handleUpdateTask={handleUpdateTask} />}
+                                {(selectedDateEvtList.length > 0) && <TaskList handleUpdateTask={handleUpdateTask} />}
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>
@@ -559,7 +495,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                             <DatePicker
                                                 ref={dateRef}
                                                 value={dayjs(dateData.start)}
-                                                onChange={(date) => { handletDate('start', date, (dateData.id !== '')) }}
+                                                // onChange={(date) => { handletDate('start', date, (dateData.id !== '')) }}
                                                 className={`w-22 sm:w-48 ${dayjs(dateData.start).format('YYYY-MM-DD') > dayjs(dateData.end).format('YYYY-MM-DD') ? 'date-error' : ''}`}
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
@@ -603,7 +539,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={koLocale}>
                                             <DatePicker
                                                 defaultValue={(dateData.allDay ? (dateData.start.split('T')[0] === dateData.end.split('T')[0] ? dayjs(dateData.end) : dayjs(dateData.end).add(-1, 'day')) : dayjs(dateData.end))}
-                                                onChange={(date) => { handletDate('end', date, (dateData.id !== '')) }}
+                                                // onChange={(date) => { handletDate('end', date, (dateData.id !== '')) }}
                                                 className={`w-22 sm:w-48 ${dayjs(dateData.start).format('YYYY-MM-DD') > dayjs(dateData.end).format('YYYY-MM-DD') ? 'date-error' : ''}`}
                                                 showDaysOutsideCurrentMonth
                                                 format="YYYY-MM-DD"
@@ -701,7 +637,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                 </div>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
-                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" value={dateData.description} onChange={(e) => { setTaskInfo(e.target.name, e.target.value, (dateData.id !== '')) }}></textarea>
+                                <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" defaultValue={dateData.description}></textarea>
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>
