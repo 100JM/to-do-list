@@ -79,37 +79,46 @@ const initDateState: DateState = {
         {
             id: '1',
             title: 'Aevent',
-            start: '2024-06-08T09:00',
-            end: '2024-06-09T18:00',
+            start: '2024-06-14T09:00',
+            end: '2024-06-15T18:00',
             color: '#3788d8',
             colorName: '워터블루',
             allDay: false,
-            important: false,
-            display: "block"
+            important: true,
+            display: "block",
+            lat: 37.5665,
+            lng: 126.9780,
+            locationName: ''
         },
         {
-            id: '2',
+            id: '2fds',
             title: 'Cevent',
-            start: '2024-07-10T09:00',
+            start: '2024-07-15T09:00',
             end: '2024-07-19T10:00',
             color: '#3788d8',
             colorName: '워터블루',
             allDay: false,
             important: true,
             description: '테스트입니다.',
-            display: "block"
+            display: "block",
+            lat: 37.5665,
+            lng: 126.9780,
+            locationName: ''
         },
         {
-            id: '3',
+            id: '3a',
             title: '긴 이름의 일정이 등록되었을때 css 조정 작업이 필요합니다.',
             start: '2024-07-10',
-            end: '2024-07-20',
+            end: '2024-07-17',
             color: '#FA8072',
             colorName: '살몬',
             allDay: true,
             important: true,
             description: '조정 작업 완료',
-            display: "block"
+            display: "block",
+            lat: 37.5665,
+            lng: 126.9780,
+            locationName: ''
         },
         {
             id: '4',
@@ -164,21 +173,8 @@ const dateSlice = createSlice({
                 }
             });
 
-            state.selectedDate = {
-                id: '',
-                title: '',
-                allDay: true,
-                start: action.payload.dateStr,
-                end: action.payload.dateStr,
-                color: '#3788d8',
-                colorName: '워터블루',
-                description: '',
-                important: false,
-                display: 'block',
-                lat: 37.5665,
-                lng: 126.9780,
-                locationName: ''
-            };
+            state.selectedDate.start = action.payload.dateStr;
+            state.selectedDate.end = action.payload.dateStr;
         },
         getSelectedEventInfo: (state, action) => {
             state.selectedDateEventInfo = state.todoList.find((t) => {
@@ -211,7 +207,7 @@ const dateSlice = createSlice({
         },
         updateTodo: (state, action: PayloadAction<SelectedDateInterface>) => {
             state.todoList = state.todoList.map((i) => {
-                if(i.id === action.payload.id) {
+                if (i.id === action.payload.id) {
                     return action.payload;
                 }
 

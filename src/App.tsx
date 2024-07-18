@@ -97,6 +97,9 @@ function App() {
   };
 
   const dateClickEvt = (arg: DateClickArg) => {
+    arg.jsEvent.stopPropagation();
+    arg.jsEvent.preventDefault();
+
     const todoEventList = arg.view.calendar.getEvents().map((event: EventApi) => {
       return {
         id: event.id,
@@ -113,6 +116,7 @@ function App() {
       selectedDateEvt: todoEventList,
     }));
 
+    dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
     dispatch(modalAction.handleModal(true));
   };
 

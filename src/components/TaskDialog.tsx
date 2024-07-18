@@ -183,6 +183,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         dispatch(modalAction.handleModal(false));
         dispatch(modalAction.handleAddArea(false));
         dispatch(modalAction.handleIsTodoButton(false));
+        dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
     }
 
     const handleShowAddrSearch = (isShow: boolean) => {
@@ -388,15 +389,9 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     }
 
     const handleAddArea = () => {
-        dispatch(modalAction.handleAddArea(!showAddArea));
+        dispatch(modalAction.handleAddArea(false));
 
         dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
-    };
-
-    const handleUpdateTask = (taskId: string) => {
-        dispatch(modalAction.handleAddArea(!showAddArea));
-
-        dispatch(dateAction.getSelectedEventInfo(taskId));
     };
 
     return (
@@ -427,7 +422,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                         <span className="text-slate-500">등록된 일정이 없습니다.</span>
                                     </div>
                                 }
-                                {(selectedDateEvtList.length > 0) && <TaskList handleUpdateTask={handleUpdateTask} />}
+                                {(selectedDateEvtList.length > 0 && openModal) && <TaskList />}
                             </DialogContentsDiv>
                         </div>
                     </DialogContent>

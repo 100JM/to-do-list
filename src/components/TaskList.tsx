@@ -1,19 +1,24 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from '../store/store';
+import { dateAction } from '../store/dateSlice';
+import { modalAction } from "../store/modalSlice";
 
-interface TaskListInterface {
-    handleUpdateTask:(taskId:string) => void;
-}
-
-const TaskList: React.FC<TaskListInterface> = ({handleUpdateTask}) => {
+const TaskList: React.FC = () => {
     const selectedDateEventList = useSelector((state:RootState) => state.date.selectedDateEventList);
-    
+    const dispatch = useDispatch();
+
+    const handleUpdateTodoArea = (id:string, e:React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        dispatch(modalAction.handleAddArea(true));
+        dispatch(dateAction.getSelectedEventInfo(id));
+    };
+
     return (
         <div className="w-full min-h-80 overflow-y-auto">
             <ul>
                 {selectedDateEventList.map((t) => (
                     <li key={t.id} className="p-1 rounded mb-2 text-white" style={{backgroundColor: t.backgroundColor}}>
-                        <button className="w-full text-start overflow-hidden text-ellipsis whitespace-nowrap" onClick={() => handleUpdateTask(t.id)}>
+                        <button className="w-full text-start overflow-hidden text-ellipsis whitespace-nowrap" onClick={(e) => handleUpdateTodoArea(t.id, e)}>
                             {t.title}
                         </button>
                     </li>
@@ -21,7 +26,6 @@ const TaskList: React.FC<TaskListInterface> = ({handleUpdateTask}) => {
             </ul>
         </div>
     );
-}
+};
 
 export default TaskList;
-
