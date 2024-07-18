@@ -61,7 +61,8 @@ function App() {
     display: 'block',
     lat: 37.5665,
     lng: 126.9780,
-    locationName: ''
+    locationName: '',
+    isKorea: true
   }
 
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({

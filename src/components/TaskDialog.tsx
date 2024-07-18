@@ -68,7 +68,8 @@ interface DateData {
     display: string,
     lat: number,
     lng: number,
-    locationName: string
+    locationName: string,
+    isKorea: boolean
 }
 
 const koLocale: string = dayjs.locale('ko');
@@ -105,6 +106,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const [dialogDate, setDialogDate] = useState<string>('');
     const [selectedAddr, setSelectedAddr] = useState<any>();
     const [mapCenter, setMapCenter] = useState<{ lat: number, lng: number }>({ lat: 37.5665, lng: 126.9780 });
+    const [isKorea, setIsKorea] = useState<boolean>(true);
 
     useEffect(() => {
         setDialogDate(selectedDateInfo.start);
@@ -128,6 +130,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         lat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lat : mapCenter.lat),
         lng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lng : mapCenter.lng),
         locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : ''),
+        isKorea: (selectedDateEvtInfo.id ? selectedDateEvtInfo.isKorea : true)
     };
 
     const eventDefaultValue = {
@@ -143,7 +146,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         display: 'block',
         lat: 37.5665,
         lng: 126.9780,
-        locationName: ''
+        locationName: '',
+        isKorea: true
     }
 
     useEffect(() => {
@@ -177,6 +181,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             });
         }
 
+        setIsKorea(dateData.isKorea);
     }, [dateData.id]);
 
     const handleCloseModal = () => {
@@ -316,6 +321,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             lat: mapCenter.lat,
             lng: mapCenter.lng,
             locationName: selectedAddr,
+            isKorea: isKorea
         };
 
         dispatch(dateAction.addNewTodo(newToDo));
@@ -365,6 +371,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             lat: mapCenter.lat,
             lng: mapCenter.lng,
             locationName: selectedAddr,
+            isKorea: isKorea
         };
 
         dispatch(dateAction.updateTodo(updatedToDo));
@@ -388,8 +395,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         }
     }
 
-    const handleAddArea = () => {
-        dispatch(modalAction.handleAddArea(false));
+    const handleAddArea = (isShow: boolean) => {
+        dispatch(modalAction.handleAddArea(isShow));
 
         dispatch(dateAction.setSelectedEventInfoDefault(eventDefaultValue));
     };
@@ -409,7 +416,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                             <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={handleCloseModal}>
                                 <FontAwesomeIcon icon={faCircleXmark as IconProp} />
                             </button>
-                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={handleAddArea}>
+                            <button type="button" className="p-1" style={{ color: "#2c3e50" }} onClick={() => handleAddArea(true)}>
                                 <FontAwesomeIcon icon={faCirclePlus as IconProp} />
                             </button>
                         </div>
@@ -436,7 +443,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                 <CloseIcon />
                             </IconButton>
                             :
-                            <IconButton aria-label="delete" size="large" onClick={handleAddArea} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
+                            <IconButton aria-label="delete" size="large" onClick={() => handleAddArea(false)} sx={{ color: openColorBar.selectedColor, padding: "8px" }}>
                                 <ArrowBackIcon />
                             </IconButton>
                         }
@@ -601,35 +608,82 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                 </Drawer>
                             </DialogContentsDiv>
                             <DialogContentsDiv>
-                                <div className="flex justify-between items-center my-1 px-1">
+                                <div className="w-full flex justify-between items-center mt-1 px-1">
                                     <div>
                                         <FontAwesomeIcon icon={faMapLocationDot as IconProp} style={{ color: openColorBar.selectedColor }} />
                                         <span className="ml-2">위치</span>
                                     </div>
                                     <div>
-                                        <button className="border px-1 rounded mr-1" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={handleLocationDefault}>
-                                            <FontAwesomeIcon icon={faArrowRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
-                                            <span>초기화</span>
-                                        </button>
-                                        <button className="border px-1 rounded" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={() => handleShowAddrSearch(true)}>
-                                            <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: openColorBar.selectedColor }} />
-                                            <span>검색</span>
-                                        </button>
-                                        <Drawer
-                                            open={showAddrSearch}
-                                            onClose={() => handleShowAddrSearch(false)}
-                                            anchor={"bottom"}
-                                            style={{ zIndex: "9999" }}
-                                            sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
+                                        <button
+                                            className="border px-1 rounded mr-1 w-14 h-7"
+                                            style={{ borderColor: openColorBar.selectedColor, color: (isKorea ? '#fff' : openColorBar.selectedColor), backgroundColor: (isKorea ? openColorBar.selectedColor : 'transparent'), fontSize: "12px" }}
+                                            onClick={() => setIsKorea(true)}
                                         >
-                                            <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
-                                        </Drawer>
+                                            <span>국내</span>
+                                        </button>
+                                        <button
+                                            className="border px-1 rounded w-14 h-7"
+                                            style={{ borderColor: openColorBar.selectedColor, color: (!isKorea ? '#fff' : openColorBar.selectedColor), backgroundColor: (!isKorea ? openColorBar.selectedColor : 'transparent'), fontSize: "12px" }}
+                                            onClick={() => setIsKorea(false)}
+                                        >
+                                            <span>해외</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div>
-                                    <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
-                                    <GoogleMaps mapCenter={mapCenter} />
-                                </div>
+                                {isKorea &&
+                                    <>
+                                        <div className="w-full flex justify-end items-center mt-2 mb-1 px-1">
+                                            <button className="border px-1 rounded mr-1 w-16 h-6" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={handleLocationDefault}>
+                                                <FontAwesomeIcon icon={faArrowRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                                <span>초기화</span>
+                                            </button>
+                                            <button className="border px-1 rounded w-16 h-6" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={() => handleShowAddrSearch(true)}>
+                                                <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                                <span>검색</span>
+                                            </button>
+                                            <Drawer
+                                                open={showAddrSearch}
+                                                onClose={() => handleShowAddrSearch(false)}
+                                                anchor={"bottom"}
+                                                style={{ zIndex: "9999" }}
+                                                sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
+                                            >
+                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
+                                            </Drawer>
+                                        </div>
+                                        <div>
+                                            <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
+                                            <KakaoMap mapCenter={mapCenter} />
+                                        </div>
+                                    </>
+                                }
+                                {!isKorea &&
+                                    <>
+                                        <div className="w-full flex justify-end items-center mt-2 mb-1 px-1">
+                                            <button className="border px-1 rounded mr-1 w-16 h-6" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={handleLocationDefault}>
+                                                <FontAwesomeIcon icon={faArrowRotateLeft as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                                <span>초기화</span>
+                                            </button>
+                                            <button className="border px-1 rounded w-16 h-6" style={{ borderColor: openColorBar.selectedColor, color: openColorBar.selectedColor, fontSize: "12px" }} onClick={() => handleShowAddrSearch(true)}>
+                                                <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: openColorBar.selectedColor }} />
+                                                <span>검색</span>
+                                            </button>
+                                            <Drawer
+                                                open={showAddrSearch}
+                                                onClose={() => handleShowAddrSearch(false)}
+                                                anchor={"bottom"}
+                                                style={{ zIndex: "9999" }}
+                                                sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
+                                            >
+                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
+                                            </Drawer>
+                                        </div>
+                                        <div>
+                                            <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
+                                            <GoogleMaps mapCenter={mapCenter} />
+                                        </div>
+                                    </>
+                                }
                             </DialogContentsDiv>
                             <DialogContentsDiv>
                                 <textarea placeholder="일정내용" className="outline-none w-full px-1 min-h-20" ref={(e) => { toDoValueRef.current['description'] = e }} name="description" defaultValue={dateData.description}></textarea>

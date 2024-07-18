@@ -16,6 +16,7 @@ interface SelectedDateInterface {
     lat: number;
     lng: number;
     locationName: string;
+    isKorea: boolean;
 };
 
 interface SelectedDateEvtInferface {
@@ -57,7 +58,8 @@ const initDateState: DateState = {
         display: 'block',
         lat: 37.5665,
         lng: 126.9780,
-        locationName: ''
+        locationName: '',
+        isKorea: true
     },
     selectedDateEventInfo: {
         id: '',
@@ -72,7 +74,8 @@ const initDateState: DateState = {
         display: 'block',
         lat: 37.5665,
         lng: 126.9780,
-        locationName: ''
+        locationName: '',
+        isKorea: true
     },
     selectedDateEventList: [],
     todoList: [
@@ -88,7 +91,8 @@ const initDateState: DateState = {
             display: "block",
             lat: 37.5665,
             lng: 126.9780,
-            locationName: ''
+            locationName: '',
+            isKorea: true
         },
         {
             id: '2fds',
@@ -103,7 +107,8 @@ const initDateState: DateState = {
             display: "block",
             lat: 37.5665,
             lng: 126.9780,
-            locationName: ''
+            locationName: '',
+            isKorea: true
         },
         {
             id: '3a',
@@ -118,7 +123,8 @@ const initDateState: DateState = {
             display: "block",
             lat: 37.5665,
             lng: 126.9780,
-            locationName: ''
+            locationName: '',
+            isKorea: true
         },
         {
             id: '4',
@@ -132,7 +138,8 @@ const initDateState: DateState = {
             display: "block",
             lat: 12.2529152,
             lng: 109.1899018,
-            locationName: '냐짱, 베트남 칸호아 냐짱'
+            locationName: '냐짱, 베트남 칸호아 냐짱',
+            isKorea: false
         }
     ],
     searchedToDoList: [],
@@ -157,7 +164,8 @@ const dateSlice = createSlice({
                 display: 'block',
                 lat: 37.5665,
                 lng: 126.9780,
-                locationName: ''
+                locationName: '',
+                isKorea: true
             }
         },
         dateClickEvt: (state, action: PayloadAction<DateClickInterface>) => {
