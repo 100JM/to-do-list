@@ -5,11 +5,11 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faMapLocationDot, faLocationDot, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 interface GoogleAddrSearchFormInterface {
-    selectedColor: string
-    handlePlaceClickEvt: (address: any) => void
+    selectedColor: string;
+    handleSetOverseaAddr: (address: any) => void;
 }
 
-const GoogleAddrSearchForm: React.FC<GoogleAddrSearchFormInterface> = ({selectedColor, handlePlaceClickEvt}) => {
+const GoogleAddrSearchForm: React.FC<GoogleAddrSearchFormInterface> = ({selectedColor, handleSetOverseaAddr}) => {
     const [places, setPlaces] = useState<google.maps.places.PlaceResult[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
     const [isZeroResult, setIsZeroResult] = useState<boolean>(false);
@@ -45,7 +45,7 @@ const GoogleAddrSearchForm: React.FC<GoogleAddrSearchFormInterface> = ({selected
     const handleButtonClick = () => {
         searchPlaces(searchValue);
     };
-    
+
     return (
         <div className="w-full h-80 p-2">
             <div className="w-full h-10 border rounded flex items-center">
@@ -74,7 +74,7 @@ const GoogleAddrSearchForm: React.FC<GoogleAddrSearchFormInterface> = ({selected
                     ) : (
                         <ul>
                             {places.map((place) => (
-                                <li key={place.place_id} className="p-2 border-b cursor-pointer hover:bg-stone-100" onClick={() => handlePlaceClickEvt(place)}>
+                                <li key={place.place_id} className="p-2 border-b cursor-pointer hover:bg-stone-100" onClick={() => handleSetOverseaAddr(place)}>
                                     <p className="text-xs pb-1">{place.formatted_address}</p>
                                     <p className="text-sm"><FontAwesomeIcon icon={faLocationDot as IconProp} style={{color: selectedColor}} />{` ${place.name}`}</p>
                                 </li>

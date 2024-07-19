@@ -13,9 +13,12 @@ interface SelectedDateInterface {
     description: string;
     important: boolean;
     display: string;
-    lat: number;
-    lng: number;
+    koreaLat: number;
+    koreaLng: number;
+    overseasLat: number;
+    overseasLng: number;
     locationName: string;
+    overseaLocationName: string;
     isKorea: boolean;
 };
 
@@ -56,9 +59,12 @@ const initDateState: DateState = {
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
+        koreaLat: 37.5665,
+        koreaLng: 126.9780,
+        overseasLat: 37.5665,
+        overseasLng: 126.9780,
         locationName: '',
+        overseaLocationName: '',
         isKorea: true
     },
     selectedDateEventInfo: {
@@ -72,9 +78,12 @@ const initDateState: DateState = {
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
+        koreaLat: 37.5665,
+        koreaLng: 126.9780,
+        overseasLat: 37.5665,
+        overseasLng: 126.9780,
         locationName: '',
+        overseaLocationName: '',
         isKorea: true
     },
     selectedDateEventList: [],
@@ -89,9 +98,12 @@ const initDateState: DateState = {
             allDay: false,
             important: true,
             display: "block",
-            lat: 37.5665,
-            lng: 126.9780,
+            koreaLat: 37.5665,
+            koreaLng: 126.9780,
+            overseasLat: 37.5665,
+            overseasLng: 126.9780,
             locationName: '',
+            overseaLocationName: '',
             isKorea: true
         },
         {
@@ -105,9 +117,12 @@ const initDateState: DateState = {
             important: true,
             description: '테스트입니다.',
             display: "block",
-            lat: 37.5665,
-            lng: 126.9780,
+            koreaLat: 37.5665,
+            koreaLng: 126.9780,
+            overseasLat: 37.5665,
+            overseasLng: 126.9780,
             locationName: '',
+            overseaLocationName: '',
             isKorea: true
         },
         {
@@ -121,9 +136,12 @@ const initDateState: DateState = {
             important: true,
             description: '조정 작업 완료',
             display: "block",
-            lat: 37.5665,
-            lng: 126.9780,
+            koreaLat: 37.5665,
+            koreaLng: 126.9780,
+            overseasLat: 37.5665,
+            overseasLng: 126.9780,
             locationName: '',
+            overseaLocationName: '',
             isKorea: true
         },
         {
@@ -136,9 +154,12 @@ const initDateState: DateState = {
             allDay: true,
             important: true,
             display: "block",
-            lat: 12.2529152,
-            lng: 109.1899018,
-            locationName: '냐짱, 베트남 칸호아 냐짱',
+            koreaLat: 37.5665,
+            koreaLng: 126.9780,
+            overseasLat: 12.2529152,
+            overseasLng: 109.1899018,
+            locationName: '',
+            overseaLocationName: '냐짱, 베트남 칸호아 냐짱',
             isKorea: false
         }
     ],
@@ -162,9 +183,12 @@ const dateSlice = createSlice({
                 description: '',
                 important: false,
                 display: 'block',
-                lat: 37.5665,
-                lng: 126.9780,
+                koreaLat: 37.5665,
+                koreaLng: 126.9780,
+                overseasLat: 37.5665,
+                overseasLng: 126.9780,
                 locationName: '',
+                overseaLocationName: '',
                 isKorea: true
             }
         },

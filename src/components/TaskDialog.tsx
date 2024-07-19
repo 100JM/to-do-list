@@ -46,9 +46,9 @@ interface TodoDialogInterface {
 }
 
 interface OpenColorBarInterface {
-    open: boolean,
-    selectedColor: string,
-    colorName: string,
+    open: boolean;
+    selectedColor: string;
+    colorName: string;
 }
 
 interface ToDoValueRefs {
@@ -56,20 +56,30 @@ interface ToDoValueRefs {
 }
 
 interface DateData {
-    id: string,
-    title: string,
-    allDay: boolean,
-    start: string,
-    end: string,
-    color: string,
-    colorName: string,
-    description: string,
-    important: boolean,
-    display: string,
-    lat: number,
-    lng: number,
-    locationName: string,
-    isKorea: boolean
+    id: string;
+    title: string;
+    allDay: boolean;
+    start: string;
+    end: string;
+    color: string;
+    colorName: string;
+    description: string;
+    important: boolean;
+    display: string;
+    koreaLat: number;
+    koreaLng: number;
+    overseasLat: number;
+    overseasLng: number;
+    locationName: string;
+    overseaLocationName: string;
+    isKorea: boolean;
+}
+
+interface MapCenterInterface {
+    koreaLat: number;
+    koreaLng: number;
+    overseasLat: number;
+    overseasLng: number;
 }
 
 const koLocale: string = dayjs.locale('ko');
@@ -105,7 +115,13 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     });
     const [dialogDate, setDialogDate] = useState<string>('');
     const [selectedAddr, setSelectedAddr] = useState<any>();
-    const [mapCenter, setMapCenter] = useState<{ lat: number, lng: number }>({ lat: 37.5665, lng: 126.9780 });
+    const [selectedAddrOversea, setSelectedAddrOversea] = useState<any>();
+    const [mapCenter, setMapCenter] = useState<MapCenterInterface>({
+        koreaLat: 37.5665,
+        koreaLng: 126.9780,
+        overseasLat: 37.5665,
+        overseasLng: 126.9780,
+    });
     const [isKorea, setIsKorea] = useState<boolean>(true);
 
     useEffect(() => {
@@ -127,9 +143,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         description: (selectedDateEvtInfo.id ? selectedDateEvtInfo.description : selectedDateInfo.description),
         important: (selectedDateEvtInfo.id ? selectedDateEvtInfo.important : selectedDateInfo.important),
         display: 'block',
-        lat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lat : mapCenter.lat),
-        lng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.lng : mapCenter.lng),
+        koreaLat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.koreaLat : selectedDateInfo.koreaLat),
+        koreaLng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.koreaLng : selectedDateInfo.koreaLng),
+        overseasLat: (selectedDateEvtInfo.id ? selectedDateEvtInfo.overseasLat : selectedDateInfo.overseasLat),
+        overseasLng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.overseasLng : selectedDateInfo.overseasLng),
         locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : ''),
+        overseaLocationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.overseaLocationName : ''),
         isKorea: (selectedDateEvtInfo.id ? selectedDateEvtInfo.isKorea : true)
     };
 
@@ -144,9 +163,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         description: '',
         important: false,
         display: 'block',
-        lat: 37.5665,
-        lng: 126.9780,
+        koreaLat: 37.5665,
+        koreaLng: 126.9780,
+        overseasLat: 37.5665,
+        overseasLng: 126.9780,
         locationName: '',
+        overseaLocationName: '',
         isKorea: true
     }
 
@@ -162,13 +184,19 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         setMapCenter((prev) => {
             return {
                 ...prev,
-                lat: (dateData.lat ? dateData.lat : mapCenter.lat),
-                lng: (dateData.lng ? dateData.lng : mapCenter.lng),
+                koreaLat: dateData.koreaLat,
+                koreaLng: dateData.koreaLng,
+                overseasLat: dateData.overseasLat,
+                overseasLng: dateData.overseasLng,
             }
         });
 
         if (dateData.locationName !== '') {
             setSelectedAddr(dateData.locationName);
+        }
+
+        if (dateData.overseaLocationName !== '') {
+            setSelectedAddrOversea(dateData.overseaLocationName);
         }
 
         if (!dateData.allDay) {
@@ -195,41 +223,48 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         setShowAddrSearch(isShow);
     };
 
-    const handlePlaceClickEvt = (address: any) => {
-        setMapCenter(address.geometry.location.toJSON());
-        setSelectedAddr(`${address.name}, ${address.formatted_address}`);
+    const handleSetOverseaAddr = (address:any) => {
+        setMapCenter((prev) => {
+            return {
+                ...prev,
+                overseasLat: address.geometry.location.toJSON().lat,
+                overseasLng: address.geometry.location.toJSON().lng
+            }
+        });
+        setSelectedAddrOversea(`${address.name}, ${address.formatted_address}`);
+        handleShowAddrSearch(false);
+    };
+
+    const handleSetKoreaAddr = (address:any) => {
+        setMapCenter((prev) => {
+            return {
+                ...prev,
+                koreaLat: address.y,
+                koreaLng: address.x
+            }
+        });
+        
+        if(address.road_address_name) {
+            setSelectedAddr(`${address.place_name}, ${address.road_address_name}`);
+        }else {
+            setSelectedAddr(`${address.place_name}, ${address.address_name}`);
+        }
+
         handleShowAddrSearch(false);
     };
 
     const handleLocationDefault = () => {
         setSelectedAddr('');
+        setSelectedAddrOversea('');
         setMapCenter((prev) => {
             return {
                 ...prev,
-                lat: 37.5665,
-                lng: 126.9780
+                koreaLat: 37.5665,
+                koreaLng: 126.9780,
+                overseasLat: 37.5665,
+                overseasLng: 126.9780,
             }
         });
-    };
-
-    const handleAddrComplete = (value: any) => {
-        setSelectedAddr(`${value.name}, ${value.formatted_address}`);
-
-        const geocoder = new kakao.maps.services.Geocoder();
-
-        let callback = function (result: any, status: any) {
-            if (status === kakao.maps.services.Status.OK) {
-                const newSearch = result[0]
-                setMapCenter((prev) => {
-                    return {
-                        ...prev,
-                        lat: newSearch.y,
-                        lng: newSearch.x
-                    }
-                })
-            }
-        };
-        geocoder.addressSearch(`${value.address}`, callback);
     };
 
     const handleIsAllday = () => {
@@ -318,9 +353,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
             display: 'block',
-            lat: mapCenter.lat,
-            lng: mapCenter.lng,
-            locationName: selectedAddr,
+            koreaLat: (isKorea ? mapCenter.koreaLat : 37.5665),
+            koreaLng: (isKorea ? mapCenter.koreaLng : 126.9780),
+            overseasLat: (isKorea ? 37.5665 : mapCenter.overseasLat),
+            overseasLng: (isKorea ? 126.9780 : mapCenter.overseasLng),
+            locationName: (isKorea ? selectedAddr : ''),
+            overseaLocationName: (isKorea ? '' : selectedAddrOversea),
             isKorea: isKorea
         };
 
@@ -368,9 +406,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             description: (toDoValueRef.current.description as HTMLTextAreaElement).value,
             important: (toDoValueRef.current.important as HTMLInputElement).checked,
             display: 'block',
-            lat: mapCenter.lat,
-            lng: mapCenter.lng,
-            locationName: selectedAddr,
+            koreaLat: (isKorea ? mapCenter.koreaLat : 37.5665),
+            koreaLng: (isKorea ? mapCenter.koreaLng : 126.9780),
+            overseasLat: (isKorea ? 37.5665 : mapCenter.overseasLat),
+            overseasLng: (isKorea ? 126.9780 : mapCenter.overseasLng),
+            locationName: (isKorea ? selectedAddr : ''),
+            overseaLocationName: (isKorea ? '' : selectedAddrOversea),
             isKorea: isKorea
         };
 
@@ -648,12 +689,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                                 style={{ zIndex: "9999" }}
                                                 sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
                                             >
-                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
+                                                <KakaoAddrSearchForm selectedColor={openColorBar.selectedColor} handleSetKoreaAddr={handleSetKoreaAddr}/>
                                             </Drawer>
                                         </div>
                                         <div>
-                                            <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
-                                            <KakaoMap mapCenter={mapCenter} />
+                                            <div className="mb-1">{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</div>
+                                            <KakaoMap mapCenter={{lat: mapCenter.koreaLat, lng: mapCenter.koreaLng}} />
                                         </div>
                                     </>
                                 }
@@ -675,12 +716,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                                 style={{ zIndex: "9999" }}
                                                 sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
                                             >
-                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handlePlaceClickEvt={handlePlaceClickEvt} />
+                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handleSetOverseaAddr={handleSetOverseaAddr} />
                                             </Drawer>
                                         </div>
                                         <div>
-                                            <small>{selectedAddr ? selectedAddr : '선택된 위치가 없습니다.'}</small>
-                                            <GoogleMaps mapCenter={mapCenter} />
+                                            <div className="mb-1">{selectedAddrOversea ? selectedAddrOversea : '선택된 위치가 없습니다.'}</div>
+                                            <GoogleMaps mapCenter={{lat: mapCenter.overseasLat, lng: mapCenter.overseasLng}} />
                                         </div>
                                     </>
                                 }

@@ -59,9 +59,12 @@ function App() {
     description: '',
     important: false,
     display: 'block',
-    lat: 37.5665,
-    lng: 126.9780,
+    koreaLat: 37.5665,
+    koreaLng: 126.9780,
+    overseasLat: 37.5665,
+    overseasLng: 126.9780,
     locationName: '',
+    overseaLocationName: '',
     isKorea: true
   }
 
