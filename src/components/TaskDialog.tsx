@@ -13,6 +13,8 @@ import KakaoMap from './KakaoMap';
 import KakaoAddrSearchForm from './KakaoAddrSearchForm';
 import GoogleMaps from './GoogleMaps';
 import GoogleAddrSearchForm from './GoogleAddrSearchForm';
+import OverseaMap from './OverseaMap';
+import OverseaAddrSearchForm from './OverseaAddrSearchForm';
 
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -227,11 +229,12 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         setMapCenter((prev) => {
             return {
                 ...prev,
-                overseasLat: address.geometry.location.toJSON().lat,
-                overseasLng: address.geometry.location.toJSON().lng
+                overseasLat: Number(address.lat),
+                overseasLng: Number(address.lon)
             }
         });
-        setSelectedAddrOversea(`${address.name}, ${address.formatted_address}`);
+        
+        setSelectedAddrOversea(address.display_name);
         handleShowAddrSearch(false);
     };
 
@@ -716,12 +719,14 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
                                                 style={{ zIndex: "9999" }}
                                                 sx={{ "& .MuiDrawer-paperAnchorBottom": { maxHeight: "100%" } }}
                                             >
-                                                <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handleSetOverseaAddr={handleSetOverseaAddr} />
+                                                {/* <GoogleAddrSearchForm selectedColor={openColorBar.selectedColor} handleSetOverseaAddr={handleSetOverseaAddr} /> */}
+                                                <OverseaAddrSearchForm selectedColor={openColorBar.selectedColor} handleSetOverseaAddr={handleSetOverseaAddr}/>
                                             </Drawer>
                                         </div>
                                         <div>
                                             <div className="mb-1">{selectedAddrOversea ? selectedAddrOversea : '선택된 위치가 없습니다.'}</div>
-                                            <GoogleMaps mapCenter={{lat: mapCenter.overseasLat, lng: mapCenter.overseasLng}} />
+                                            {/* <GoogleMaps mapCenter={{lat: mapCenter.overseasLat, lng: mapCenter.overseasLng}} /> */}
+                                            <OverseaMap mapCenter={{lat: mapCenter.overseasLat, lng: mapCenter.overseasLng}}/>
                                         </div>
                                     </>
                                 }

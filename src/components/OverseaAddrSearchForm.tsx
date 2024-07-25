@@ -5,45 +5,42 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faMapLocationDot, faLocationDot, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
-interface KakaoAddrSearchFormInterface {
+interface OverseaAddrSearchFormInterface {
     selectedColor: string;
-    handleSetKoreaAddr: (address: any) => void;
+    handleSetOverseaAddr: (address: any) => void;
 }
 
-const KakaoAddrSearchForm: React.FC<KakaoAddrSearchFormInterface> = ({selectedColor, handleSetKoreaAddr}) => {
+const OverseaAddrSearchForm: React.FC<OverseaAddrSearchFormInterface> = ({selectedColor, handleSetOverseaAddr}) => {
     const [searchedAddr, setSearchedAddr] = useState<Array<any>>([]);
     const [isSearchEnd, setIsSearchEnd] = useState<boolean>(false);
     const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-    const searchAddr = async () => {
+    const nominatimAddrSearch = async () => {
         setSearchedAddr([]);
         setIsSearchEnd(false);
 
-        if(!(searchInputRef.current as HTMLInputElement).value) {
-            return;
-        }
-
         try {
-            const keywordResponse = await axios.get('https://dapi.kakao.com/v2/local/search/keyword.json', {
+            const response = await axios.get('https://nominatim.openstreetmap.org/search', {
                 params: {
-                    query: (searchInputRef.current as HTMLInputElement).value,
-                },
-                headers: {
-                    Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}`,
+                    q: (searchInputRef.current as HTMLInputElement).value,
+                    format: 'json',
+                    addressdetails: 1,
+                    limit: 10
                 }
             });
 
-            setSearchedAddr(keywordResponse.data.documents);
-            setIsSearchEnd(keywordResponse.data.meta.is_end);
+            setSearchedAddr(response.data);
 
         } catch (error) {
-            console.log('Error: ', error);
+            console.error('Error fetching data from Nominatim:', error);
+        } finally {
+            setIsSearchEnd(true);
         }
     };
 
     const handleOnEnter = (key:any) => {
         if(key.key === 'Enter' || key.keyCode === 13) {
-            searchAddr();
+            nominatimAddrSearch();
         }
     };
 
@@ -61,7 +58,7 @@ const KakaoAddrSearchForm: React.FC<KakaoAddrSearchFormInterface> = ({selectedCo
                     ref={searchInputRef}
                     onKeyUp={(e) => handleOnEnter(e)}
                 />
-                <button className="w-6" onClick={searchAddr}>
+                <button className="w-6" onClick={nominatimAddrSearch}>
                     <FontAwesomeIcon icon={faMagnifyingGlass as IconProp} style={{ color: "rgb(166 167 169)" }} />
                 </button>
             </div>
@@ -80,17 +77,16 @@ const KakaoAddrSearchForm: React.FC<KakaoAddrSearchFormInterface> = ({selectedCo
                     searchedAddr.length > 0 &&
                     <ul>
                         {searchedAddr.map((l) => (
-                            <li key={l.id} className="p-2 border-b cursor-pointer hover:bg-stone-100" onClick={() => handleSetKoreaAddr(l)}>
-                                <p className="text-xs pb-1">{l.address_name}</p>
-                                <p className="text-xs pb-1">{l.road_address_name}</p>
-                                <p className="text-sm"><FontAwesomeIcon icon={faLocationDot as IconProp} style={{ color: selectedColor }} />{` ${l.place_name}`}</p>
+                            <li key={l.place_id} className="p-2 border-b cursor-pointer hover:bg-stone-100" onClick={() => handleSetOverseaAddr(l)}>
+                                <p className="text-xs pb-1">{l.display_name}</p>
+                                <p className="text-sm"><FontAwesomeIcon icon={faLocationDot as IconProp} style={{ color: selectedColor }} />{` ${l.name}`}</p>
                             </li>
                         ))}
                     </ul>
                 }
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default KakaoAddrSearchForm;
+export default OverseaAddrSearchForm;
