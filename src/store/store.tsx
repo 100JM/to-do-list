@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 
 import modalReducer from "./modalSlice";
 import dateReducer from "./dateSlice";
+import loginReducer from "./loginSlice";
 
 const store = configureStore({
     reducer: {
         modal: modalReducer,
         date: dateReducer,
+        login: loginReducer,
     }
 });
 
