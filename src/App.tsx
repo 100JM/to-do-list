@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { modalAction } from './store/modalSlice';
@@ -20,6 +20,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
 import Login from './components/Login';
+import UserDialog from './components/UserDialog';
 // import KakaoAddrSearchForm from './components/KakaoAddrSearchForm';
 
 import Box from '@mui/material/Box';
@@ -46,6 +47,8 @@ function App() {
   const searchedmyTodoList = useSelector((state: RootState) => state.date.searchedToDoList);
   const importantMyTodoList = useSelector((state: RootState) => state.date.importantEventList);
   const isLogin = useSelector((state: RootState) => state.login.isLogin);
+  const userName = useSelector((state: RootState) => state.login.name);
+  const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
 
   const calendarHeight: CssDimValue = '92%';
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -75,9 +78,7 @@ function App() {
     alertText: '',
     alertType: 'success'
   });
-
   const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
-
   const [bottomMenu, setBottomMenu] = useState('calendar');
 
   useEffect(() => {
@@ -160,7 +161,7 @@ function App() {
     }
 
     setBottomMenu(value);
-  }
+  };
 
   return (
     <>
@@ -194,9 +195,13 @@ function App() {
                         icon: 'bi bi-search',
                         click: () => { searchButtonClickEvt(true) },
                       },
+                      logout: {
+                        text: `${userName}님`,
+                        click: () => { dispatch(modalAction.handleUserModal(true)) }
+                      },
                     }}
                     headerToolbar={{
-                      left: 'prev,next today',
+                      left: 'prev,next today logout',
                       center: 'title',
                       right: 'searchButton',
                     }}
@@ -399,6 +404,7 @@ function App() {
           </>
         }
         <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert} />
+        {isUserDialog && <UserDialog />}
       </section>
     </>
   )

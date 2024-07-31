@@ -11,8 +11,8 @@ import TaskList from './TaskList';
 import CustomAlert from './CustomAlert';
 import KakaoMap from './KakaoMap';
 import KakaoAddrSearchForm from './KakaoAddrSearchForm';
-import GoogleMaps from './GoogleMaps';
-import GoogleAddrSearchForm from './GoogleAddrSearchForm';
+// import GoogleMaps from './GoogleMaps';
+// import GoogleAddrSearchForm from './GoogleAddrSearchForm';
 import OverseaMap from './OverseaMap';
 import OverseaAddrSearchForm from './OverseaAddrSearchForm';
 

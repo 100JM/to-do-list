@@ -4,12 +4,14 @@ interface ModalState {
     isOpen: boolean;
     isAddArea: boolean;
     isTodoButton: boolean;
+    isUserDialog: boolean;
 };
 
 const initModalState: ModalState = {
     isOpen: false,
     isAddArea: false,
-    isTodoButton: false
+    isTodoButton: false,
+    isUserDialog: false
 };
 
 const ModalSlice = createSlice({
@@ -25,6 +27,9 @@ const ModalSlice = createSlice({
         handleIsTodoButton: (state, action) => {
             state.isTodoButton = action.payload;
         },
+        handleUserModal: (state, action) => {
+            state.isUserDialog = action.payload;
+        }
     },
 });
 
