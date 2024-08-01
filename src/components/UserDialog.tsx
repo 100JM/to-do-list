@@ -8,6 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Avatar from '@mui/material/Avatar';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import PersonIcon from '@mui/icons-material/Person';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -22,6 +23,7 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 const UserDialog: React.FC = () => {
     const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
     const userName = useSelector((state: RootState) => state.login.name);
+    const userImg = useSelector((state: RootState) => state.login.profileImage);
     const dispatch = useDispatch();
 
     const closeUserDialog = () => {
@@ -33,22 +35,19 @@ const UserDialog: React.FC = () => {
             window.Kakao.Auth.logout(() => {
                 dispatch(modalAction.handleUserModal(false));
                 dispatch(loginAction.handleLogout());
+                localStorage.removeItem('kakao_access_token');
             });
         }
     };
 
     const handleReauthorize = () => {
         if (window.Kakao && window.Kakao.Auth) {
+            const state = 'reauthorize';
+
             window.Kakao.Auth.authorize({
                 redirectUri: 'http://192.168.0.127:5173',
-                scope: 'profile_image', // 다시 동의를 요청할 항목
-                success: (response: any) => {
-                    console.log('Reauthorize success:', response);
-                    dispatch(loginAction.handleLogout());
-                },
-                fail: (error: any) => {
-                    console.error('Reauthorize failed:', error);
-                },
+                scope: 'profile_image',
+                state: state
             });
         }
     };
@@ -58,9 +57,23 @@ const UserDialog: React.FC = () => {
             open={isUserDialog}
             onClose={closeUserDialog}
         >
-            <DialogTitle style={{ padding: "16px" }}>
+            <DialogTitle style={{ padding: "10px 16px", borderBottom: "1px solid #eee" }}>
                 <div className="flex justify-between items-center">
-                    <span>{`${userName}님`}</span>
+                    <div className="flex items-center">
+                        {
+                            !userImg &&
+                            <Avatar sx={{ bgcolor: blue[100], color: blue[600], marginRight: "8px" }}>
+                                <PersonIcon />
+                            </Avatar>
+                        }
+                        {
+                            userImg &&
+                            <Avatar sx={{ bgcolor: blue[100], color: blue[600], marginRight: "8px" }}>
+                                <img src={userImg} />
+                            </Avatar>
+                        }
+                        {` ${userName}님`}
+                    </div>
                     <button type="button" style={{ color: "#2c3e50" }} onClick={closeUserDialog}>
                         <FontAwesomeIcon icon={faXmark as IconProp} />
                     </button>

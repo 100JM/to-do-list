@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { modalAction } from './store/modalSlice';
 import { dateAction } from './store/dateSlice';
+import { loginAction } from './store/loginSlice';
 
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from "@fullcalendar/interaction";
@@ -34,6 +35,8 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 
+import UserBasicImg from './assets/kakao-basic-person.jpg';
+
 interface CustomAlertInterface {
   isShow: boolean;
   alertText: string;
@@ -48,6 +51,7 @@ function App() {
   const importantMyTodoList = useSelector((state: RootState) => state.date.importantEventList);
   const isLogin = useSelector((state: RootState) => state.login.isLogin);
   const userName = useSelector((state: RootState) => state.login.name);
+  const userImg = useSelector((state: RootState) => state.login.profileImage);
   const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
 
   const calendarHeight: CssDimValue = '92%';
@@ -82,12 +86,100 @@ function App() {
   const [bottomMenu, setBottomMenu] = useState('calendar');
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state'); // 초기화 필요함
+
+    console.log(state);
+    const token = localStorage.getItem('kakao_access_token');
+
+    if (code && state === 'reauthorize') {
+      fetchAccessToken(code).then(() => {
+        urlParams.delete('state');
+        window.history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
+      });
+    }else {
+      if (token) {
+        window.Kakao.Auth.setAccessToken(token);
+        fetchUserInfo();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLogin) {
+      const logoutButton = document.querySelector('.fc-logout-button');
+
+      if (logoutButton) {
+        if (!userImg) {
+          logoutButton.innerHTML = `
+            <div class="no-user-img">
+              <img class="default-person-img" src=${UserBasicImg} /> ${userName}
+            </div>
+          `;
+        } else {
+          logoutButton.innerHTML = `
+            <div class="no-user-img">
+              <img class="default-person-img" src=${userImg} /> ${userName}
+            </div>
+          `;
+        }
+      }
+    }
+  }, [isLogin]);
+
+  useEffect(() => {
     if (showSearchForm) {
       dispatch(dateAction.searchToDoEvt((searchInputRef.current?.value !== undefined) ? searchInputRef.current?.value : ''));
     }
 
     dispatch(dateAction.getImportantTodoList());
   }, [myTodoList, showSearchForm]);
+
+  const fetchAccessToken = async (code: string) => {
+    const data = {
+      grant_type: 'authorization_code',
+      client_id: import.meta.env.VITE_KAKAO_MAP_API_KEY,
+      redirect_uri: 'http://192.168.0.127:5173',
+      code: code
+    };
+
+    fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+      },
+      body: new URLSearchParams(data as any).toString()
+    })
+      .then(response => response.json())
+      .then(response => {
+        console.log('Access Token:', response);
+        const accessToken = response.access_token;
+        localStorage.setItem('kakao_access_token', accessToken);
+        window.Kakao.Auth.setAccessToken(accessToken);
+        fetchUserInfo();
+      })
+      .catch(error => console.error('Error fetching access token:', error));
+  };
+
+  const fetchUserInfo = () => {
+    if (window.Kakao) {
+      window.Kakao.API.request({
+        url: '/v2/user/me'
+      }).then((response: any) => {
+        const userInfo = {
+          id: response.id,
+          name: response.properties.nickname,
+          profileImage: response.properties.profile_image ? response.properties.profile_image : ''
+        };
+        console.log(response);
+        dispatch(loginAction.handleLogin(userInfo));
+
+      }).catch((error: any) => {
+        console.error('User profile fetch failed:', error);
+      });
+    }
+  };
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {
     if (newValue !== 'todo') {
@@ -196,7 +288,6 @@ function App() {
                         click: () => { searchButtonClickEvt(true) },
                       },
                       logout: {
-                        text: `${userName}님`,
                         click: () => { dispatch(modalAction.handleUserModal(true)) }
                       },
                     }}

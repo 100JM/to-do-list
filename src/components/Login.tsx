@@ -13,8 +13,10 @@ const Login: React.FC = () => {
         const userInfo = {
             id: res.profile.id,
             name: res.profile.properties.nickname,
-            accessToken: res.response.access_token
-        }
+            profileImage: res.profile.properties.profile_image ? res.profile.properties.profile_image : ''
+        };
+
+        localStorage.setItem('kakao_access_token', res.response.access_token);
 
         dispatch(loginAction.handleLogin(userInfo));
     };

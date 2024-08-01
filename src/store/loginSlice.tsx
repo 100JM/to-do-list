@@ -1,23 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface LoginState {
-    isLogin:boolean,
-    name:string,
-    id:number,
-    accessToken:string
+    isLogin:boolean;
+    name:string;
+    id:number;
+    profileImage:string;
 };
 
 interface handleLogin {
-    name:string,
-    id:number,
-    accessToken:string
+    name:string;
+    id:number;
+    profileImage:string;
 };
 
 const initLoginState:LoginState = {
     isLogin: false,
     name: '',
     id: 0,
-    accessToken: ''
+    profileImage:''
 };
 
 const loginSlice = createSlice({
@@ -28,13 +28,13 @@ const loginSlice = createSlice({
             state.isLogin = true;
             state.id = action.payload.id;
             state.name = action.payload.name;
-            state.accessToken = action.payload.accessToken;
+            state.profileImage = action.payload.profileImage;
         },
         handleLogout: (state) => {
             state.isLogin = false;
             state.id = 0;
             state.name = '';
-            state.accessToken = '';
+            state.profileImage = '';
         },
     }
 });
