@@ -88,7 +88,7 @@ function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    const state = urlParams.get('state'); // 초기화 필요함
+    const state = urlParams.get('state');
 
     console.log(state);
     const token = localStorage.getItem('kakao_access_token');
@@ -97,6 +97,7 @@ function App() {
       fetchAccessToken(code).then(() => {
         urlParams.delete('state');
         window.history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
+        // handleReauthorize로 리다이렉트 후 url parameter state 삭제
       });
     }else {
       if (token) {
@@ -126,7 +127,7 @@ function App() {
         }
       }
     }
-  }, [isLogin]);
+  }, [isLogin, bottomMenu, showSearchForm]);
 
   useEffect(() => {
     if (showSearchForm) {
@@ -264,7 +265,15 @@ function App() {
         bottomMenu={bottomMenu}
       />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
-        {!isLogin && <Login />}
+        {
+          !isLogin && 
+          <>
+            <div className="w-full h-1/2 flex justify-center items-center p-4 ">
+              <div className="w-full h-full flex justify-center items-center text-4xl pacifico-regular">TO DO LIST</div>
+            </div>
+            <Login />
+          </>
+        }
         {isLogin &&
           <>
             <CSSTransition

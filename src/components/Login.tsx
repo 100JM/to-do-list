@@ -22,7 +22,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="w-full h-full flex justify-center items-center">
+        <div className="w-full h-1/2 flex justify-center items-center">
             <KakaoLogin
                 token={import.meta.env.VITE_KAKAO_MAP_API_KEY}
                 onSuccess={handleLogin}
@@ -30,7 +30,7 @@ const Login: React.FC = () => {
                 style={{
                     backgroundColor: "none",
                     width: "220px",
-                    height: "60px"
+                    height: "60px",
                 }}
             >
                 <img src={kakaoLoginImg} alt='kakao_login' />
