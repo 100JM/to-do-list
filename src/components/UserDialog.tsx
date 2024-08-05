@@ -28,15 +28,25 @@ const UserDialog: React.FC = () => {
 
     const closeUserDialog = () => {
         dispatch(modalAction.handleUserModal(false));
-    }
+    };
 
     const handleLogout = () => {
-        if (window.Kakao && window.Kakao.Auth) {
-            window.Kakao.Auth.logout(() => {
+        const logoutLogic = () => {
+            try {
+                localStorage.removeItem('kakao_access_token');
                 dispatch(modalAction.handleUserModal(false));
                 dispatch(loginAction.handleLogout());
-                localStorage.removeItem('kakao_access_token');
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        if (window.Kakao && window.Kakao.Auth) {
+            window.Kakao.Auth.logout(() => {
+                console.log('kakao logout');
             });
+            logoutLogic();
+            console.log(window.Kakao.Auth.getAccessToken());
         }
     };
 

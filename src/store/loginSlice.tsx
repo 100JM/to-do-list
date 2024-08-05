@@ -5,6 +5,7 @@ interface LoginState {
     name:string;
     id:number;
     profileImage:string;
+    isLoading:boolean;
 };
 
 interface handleLogin {
@@ -17,7 +18,8 @@ const initLoginState:LoginState = {
     isLogin: false,
     name: '',
     id: 0,
-    profileImage:''
+    profileImage: '',
+    isLoading: true,
 };
 
 const loginSlice = createSlice({
@@ -35,6 +37,9 @@ const loginSlice = createSlice({
             state.id = 0;
             state.name = '';
             state.profileImage = '';
+        },
+        handleLoading: (state, action) => {
+            state.isLoading = action.payload;
         },
     }
 });

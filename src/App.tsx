@@ -53,6 +53,7 @@ function App() {
   const userName = useSelector((state: RootState) => state.login.name);
   const userImg = useSelector((state: RootState) => state.login.profileImage);
   const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
+  // const isMainLoading = useSelector((state: RootState) => state.login.isLoading);
 
   const calendarHeight: CssDimValue = '92%';
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -83,7 +84,7 @@ function App() {
     alertType: 'success'
   });
   const [showSearchForm, setShowSearchForm] = useState<boolean>(false);
-  const [bottomMenu, setBottomMenu] = useState('calendar');
+  const [bottomMenu, setBottomMenu] = useState<string>('calendar');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -96,13 +97,14 @@ function App() {
     if (code && state === 'reauthorize') {
       fetchAccessToken(code).then(() => {
         urlParams.delete('state');
+        urlParams.delete('code');
         window.history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
         // handleReauthorize로 리다이렉트 후 url parameter state 삭제
       });
-    }else {
+    } else {
       if (token) {
-        window.Kakao.Auth.setAccessToken(token);
-        fetchUserInfo();
+        console.log('no code');
+        fetchUserInfo(token);
       }
     }
   }, []);
@@ -156,14 +158,17 @@ function App() {
       .then(response => {
         console.log('Access Token:', response);
         const accessToken = response.access_token;
-        localStorage.setItem('kakao_access_token', accessToken);
-        window.Kakao.Auth.setAccessToken(accessToken);
-        fetchUserInfo();
+        // localStorage.setItem('kakao_access_token', accessToken);
+        // window.Kakao.Auth.setAccessToken(accessToken);
+        fetchUserInfo(accessToken);
       })
       .catch(error => console.error('Error fetching access token:', error));
   };
 
-  const fetchUserInfo = () => {
+  const fetchUserInfo = (token: string) => {
+    localStorage.setItem('kakao_access_token', token);
+    window.Kakao.Auth.setAccessToken(token);
+
     if (window.Kakao) {
       window.Kakao.API.request({
         url: '/v2/user/me'
@@ -175,7 +180,6 @@ function App() {
         };
         console.log(response);
         dispatch(loginAction.handleLogin(userInfo));
-
       }).catch((error: any) => {
         console.error('User profile fetch failed:', error);
       });
@@ -265,174 +269,129 @@ function App() {
         bottomMenu={bottomMenu}
       />}
       <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
-        {
-          !isLogin && 
-          <>
-            <div className="w-full h-1/2 flex justify-center items-center p-4 ">
-              <div className="w-full h-full flex justify-center items-center text-4xl pacifico-regular">TO DO LIST</div>
-            </div>
-            <Login />
-          </>
-        }
-        {isLogin &&
-          <>
-            <CSSTransition
-              in={!showSearchForm}
-              timeout={300}
-              classNames="slide"
-              unmountOnExit
-            >
-              <div className="w-full h-full">
-                {
-                  bottomMenu === 'calendar' &&
-                  <FullCalendar
-                    plugins={[dayGridPlugin, interactionPlugin]}
-                    initialView="dayGridMonth"
-                    editable={false}
-                    // height={calendarHeight}
-                    locale={koLocale}
-                    customButtons={{
-                      searchButton: {
-                        icon: 'bi bi-search',
-                        click: () => { searchButtonClickEvt(true) },
-                      },
-                      logout: {
-                        click: () => { dispatch(modalAction.handleUserModal(true)) }
-                      },
-                    }}
-                    headerToolbar={{
-                      left: 'prev,next today logout',
-                      center: 'title',
-                      right: 'searchButton',
-                    }}
-                    dateClick={dateClickEvt}
-                    events={myTodoList}
-                    displayEventTime={false}
-                    timeZone='UTC'
-                  />
-                }
-                {
-                  bottomMenu === 'importantTodo' &&
-                  <>
-                    <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
-                    <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
-                      {
-                        (importantMyTodoList.length > 0) ?
-                          importantMyTodoList.map((i) => {
-                            const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
-                            const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
+        <>
+          {
+            !isLogin &&
+            <>
+              <div className="w-full h-1/2 flex justify-center items-center p-4 ">
+                <div className="w-full h-full flex justify-center items-center text-4xl pacifico-regular">TO DO LIST</div>
+              </div>
+              <Login />
+            </>
+          }
+          {isLogin &&
+            <>
+              <CSSTransition
+                in={!showSearchForm}
+                timeout={300}
+                classNames="slide"
+                unmountOnExit
+              >
+                <div className="w-full h-full">
+                  {
+                    bottomMenu === 'calendar' &&
+                    <FullCalendar
+                      plugins={[dayGridPlugin, interactionPlugin]}
+                      initialView="dayGridMonth"
+                      editable={false}
+                      // height={calendarHeight}
+                      locale={koLocale}
+                      customButtons={{
+                        searchButton: {
+                          icon: 'bi bi-search',
+                          click: () => { searchButtonClickEvt(true) },
+                        },
+                        logout: {
+                          click: () => { dispatch(modalAction.handleUserModal(true)) }
+                        },
+                      }}
+                      headerToolbar={{
+                        left: 'prev,next today logout',
+                        center: 'title',
+                        right: 'searchButton',
+                      }}
+                      dateClick={dateClickEvt}
+                      events={myTodoList}
+                      displayEventTime={false}
+                      timeZone='UTC'
+                    />
+                  }
+                  {
+                    bottomMenu === 'importantTodo' &&
+                    <>
+                      <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
+                      <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
+                        {
+                          (importantMyTodoList.length > 0) ?
+                            importantMyTodoList.map((i) => {
+                              const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                              const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
 
-                            return (
-                              <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
-                                <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
-                                <div style={{ width: "calc(100% - 1.5rem)" }}>
-                                  <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
-                                  <div>{`시작일 ${i.start.split('T')[0]}`}</div>
-                                  <div className="flex justify-between">
-                                    <div>{`종료일 ${importantEndDate}`}</div>
-                                    <div>
-                                      {
-                                        (importantEndDday > 0) ?
-                                          (
-                                            (importantEndDday <= 3) ?
-                                              <>
-                                                <i className="bi bi-alarm text-red-500">
-                                                  {` D-day ${importantEndDday}일`}
-                                                </i>
-                                              </>
-                                              :
-                                              ` D-day ${importantEndDday}일`
-                                          )
-                                          :
-                                          (
-                                            (importantEndDday === 0) ?
-                                              <>
-                                                <i className="bi bi-alarm text-red-500">
-                                                  {'D-day 오늘'}
-                                                </i>
-                                              </>
-                                              :
-                                              '종료된 일정'
-                                          )
-                                      }
+                              return (
+                                <div key={i.id} className="p-2 border border-gray-300 rounded-xl shadow mb-3 flex cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(i.id)}>
+                                  <div className="w-4 rounded-md mr-2" style={{ backgroundColor: `${i.color}` }}></div>
+                                  <div style={{ width: "calc(100% - 1.5rem)" }}>
+                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap">{i.title}</div>
+                                    <div>{`시작일 ${i.start.split('T')[0]}`}</div>
+                                    <div className="flex justify-between">
+                                      <div>{`종료일 ${importantEndDate}`}</div>
+                                      <div>
+                                        {
+                                          (importantEndDday > 0) ?
+                                            (
+                                              (importantEndDday <= 3) ?
+                                                <>
+                                                  <i className="bi bi-alarm text-red-500">
+                                                    {` D-day ${importantEndDday}일`}
+                                                  </i>
+                                                </>
+                                                :
+                                                ` D-day ${importantEndDday}일`
+                                            )
+                                            :
+                                            (
+                                              (importantEndDday === 0) ?
+                                                <>
+                                                  <i className="bi bi-alarm text-red-500">
+                                                    {'D-day 오늘'}
+                                                  </i>
+                                                </>
+                                                :
+                                                '종료된 일정'
+                                            )
+                                        }
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            )
-                          })
-                          :
-                          <div className="w-full h-full flex items-center justify-center text-base">
-                            등록된 중요 일정이 없습니다.
-                          </div>
-                      }
-                    </div>
-                  </>
-                }
-                <SpeedDial
-                  ariaLabel="Desktop SpeedDial"
-                  icon={<SpeedDialIcon />}
-                  sx={{
-                    display: "none",
-                    "@media (min-width:720px)": {
-                      display: "flex",
-                      position: "absolute",
-                      bottom: "30px",
-                      right: "30px",
-                    }
-                  }}
-                  direction="up"
-                >
-                  <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
-                  <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
-                  <SpeedDialAction
-                    key="importantTodo"
-                    icon={
-                      <Badge badgeContent={
-                        importantMyTodoList.filter((i) => {
-                          const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
-                          const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
-
-                          return (
-                            importantEndDday >= 0 && importantEndDday <= 3
-                          )
-                        }).length
-                      }
-                        color="error">
-                        <PushPinIcon />
-                      </Badge>
-                    }
-                    tooltipTitle="중요 일정"
-                    onClick={() => desktopMenuEvt('importantTodo')}
-                  />
-                </SpeedDial>
-                <Box sx={{
-                  width: "100%",
-                  height: "8%",
-                  display: "block",
-                  "& .MuiBottomNavigationAction-root": { color: "#2c3e50" },
-                  "@media (min-width:720px)": {
-                    display: "none"
+                              )
+                            })
+                            :
+                            <div className="w-full h-full flex items-center justify-center text-base">
+                              등록된 중요 일정이 없습니다.
+                            </div>
+                        }
+                      </div>
+                    </>
                   }
-                }}>
-                  <BottomNavigation
-                    showLabels
-                    value={bottomMenu}
-                    onChange={handleBottomMenuChange}
+                  <SpeedDial
+                    ariaLabel="Desktop SpeedDial"
+                    icon={<SpeedDialIcon />}
                     sx={{
-                      width: "100%",
-                      height: "100%",
-                      paddingTop: "12px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignContent: "center"
+                      display: "none",
+                      "@media (min-width:720px)": {
+                        display: "flex",
+                        position: "absolute",
+                        bottom: "30px",
+                        right: "30px",
+                      }
                     }}
+                    direction="up"
                   >
-                    <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
-                    <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
-                    <BottomNavigationAction
-                      label="중요 일정"
-                      value="importantTodo"
+                    <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
+                    <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
+                    <SpeedDialAction
+                      key="importantTodo"
                       icon={
                         <Badge badgeContent={
                           importantMyTodoList.filter((i) => {
@@ -448,61 +407,108 @@ function App() {
                           <PushPinIcon />
                         </Badge>
                       }
-                      onClick={() => dispatch(dateAction.getImportantTodoList())}
+                      tooltipTitle="중요 일정"
+                      onClick={() => desktopMenuEvt('importantTodo')}
                     />
-                  </BottomNavigation>
-                </Box>
-              </div>
-            </CSSTransition>
-            <CSSTransition
-              in={showSearchForm}
-              timeout={300}
-              classNames="slide"
-              unmountOnExit
-            >
-              <div className="h-full w-full p-4">
-                <div className="w-full h-10 flex items-center justify-between pb-2">
-                  <ArrowBackIcon onClick={() => searchButtonClickEvt(false)} sx={{ cursor: "pointer" }} />
-                  <span className="text-center flex-grow mr-6 text-lg">검색</span>
+                  </SpeedDial>
+                  <Box sx={{
+                    width: "100%",
+                    height: "8%",
+                    display: "block",
+                    "& .MuiBottomNavigationAction-root": { color: "#2c3e50" },
+                    "@media (min-width:720px)": {
+                      display: "none"
+                    }
+                  }}>
+                    <BottomNavigation
+                      showLabels
+                      value={bottomMenu}
+                      onChange={handleBottomMenuChange}
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        paddingTop: "12px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignContent: "center"
+                      }}
+                    >
+                      <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
+                      <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
+                      <BottomNavigationAction
+                        label="중요 일정"
+                        value="importantTodo"
+                        icon={
+                          <Badge badgeContent={
+                            importantMyTodoList.filter((i) => {
+                              const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
+                              const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
+
+                              return (
+                                importantEndDday >= 0 && importantEndDday <= 3
+                              )
+                            }).length
+                          }
+                            color="error">
+                            <PushPinIcon />
+                          </Badge>
+                        }
+                        onClick={() => dispatch(dateAction.getImportantTodoList())}
+                      />
+                    </BottomNavigation>
+                  </Box>
                 </div>
-                <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
-                  <SearchIcon />
-                  <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => dispatch(dateAction.searchToDoEvt(e.target.value))} />
-                </div>
-                <div className="w-full overflow-y-auto" style={{ height: "calc(100% - 5.55rem)" }}>
-                  {
-                    searchedmyTodoList.length === 0 && !searchInputRef.current?.value &&
-                    <div className="w-full h-full flex justify-center items-center text-gray-400">
-                      <span>키워드를 입력하세요.</span>
-                    </div>
-                  }
-                  {
-                    searchedmyTodoList.length === 0 && searchInputRef.current?.value &&
-                    <div className="w-full h-full flex justify-center items-center text-gray-400">
-                      <span>검색 결과가 없습니다.</span>
-                    </div>
-                  }
-                  {
-                    searchedmyTodoList.length > 0 && searchInputRef.current?.value &&
-                    searchedmyTodoList.map((t) => {
-                      return (
-                        <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
-                          <div className="w-full h-full">
-                            <div className="text-white rounded p-1 mb-1" style={{ backgroundColor: `${t.color}` }}>
-                              {t.start.split('T')[0]}
+              </CSSTransition>
+              <CSSTransition
+                in={showSearchForm}
+                timeout={300}
+                classNames="slide"
+                unmountOnExit
+              >
+                <div className="h-full w-full p-4">
+                  <div className="w-full h-10 flex items-center justify-between pb-2">
+                    <ArrowBackIcon onClick={() => searchButtonClickEvt(false)} sx={{ cursor: "pointer" }} />
+                    <span className="text-center flex-grow mr-6 text-lg">검색</span>
+                  </div>
+                  <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
+                    <SearchIcon />
+                    <input type="text" className="h-full w-full p-2 outline-none" placeholder="키워드" ref={searchInputRef} onChange={(e) => dispatch(dateAction.searchToDoEvt(e.target.value))} />
+                  </div>
+                  <div className="w-full overflow-y-auto" style={{ height: "calc(100% - 5.55rem)" }}>
+                    {
+                      searchedmyTodoList.length === 0 && !searchInputRef.current?.value &&
+                      <div className="w-full h-full flex justify-center items-center text-gray-400">
+                        <span>키워드를 입력하세요.</span>
+                      </div>
+                    }
+                    {
+                      searchedmyTodoList.length === 0 && searchInputRef.current?.value &&
+                      <div className="w-full h-full flex justify-center items-center text-gray-400">
+                        <span>검색 결과가 없습니다.</span>
+                      </div>
+                    }
+                    {
+                      searchedmyTodoList.length > 0 && searchInputRef.current?.value &&
+                      searchedmyTodoList.map((t) => {
+                        return (
+                          <div key={t.id} className="w-full h-18 py-2 flex justify-start items-center border-b cursor-pointer hover:bg-gray-100" onClick={() => searchResultClickEvt(t.id)}>
+                            <div className="w-full h-full">
+                              <div className="text-white rounded p-1 mb-1" style={{ backgroundColor: `${t.color}` }}>
+                                {t.start.split('T')[0]}
+                              </div>
+                              <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.title}</div>
+                              <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.description ? t.description : '-'}</div>
                             </div>
-                            <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.title}</div>
-                            <div className="overflow-hidden text-ellipsis whitespace-nowrap">{t.description ? t.description : '-'}</div>
                           </div>
-                        </div>
-                      )
-                    })
-                  }
+                        )
+                      })
+                    }
+                  </div>
                 </div>
-              </div>
-            </CSSTransition>
-          </>
-        }
+              </CSSTransition>
+            </>
+          }
+        </>
         <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert} />
         {isUserDialog && <UserDialog />}
       </section>
