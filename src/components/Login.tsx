@@ -1,5 +1,4 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store/store';
+import { useDispatch } from 'react-redux';
 import { loginAction } from '../store/loginSlice';
 
 import KakaoLogin from 'react-kakao-login';

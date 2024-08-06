@@ -1,7 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { modalAction } from '../store/modalSlice';
-import { loginAction } from '../store/loginSlice';
+import { loginAction, kakaoLogoutThunk } from '../store/loginSlice';
+import { useAppDispatch } from '../store/hook';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -20,37 +21,35 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
-const UserDialog: React.FC = () => {
+interface UserDialogInterface {
+    handleShowAlert: (isShow:boolean, alertText:string, alertType: 'error' | 'warning' | 'info' | 'success') => void;
+};
+
+const UserDialog: React.FC<UserDialogInterface> = ({handleShowAlert}) => {
     const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
     const userName = useSelector((state: RootState) => state.login.name);
     const userImg = useSelector((state: RootState) => state.login.profileImage);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const closeUserDialog = () => {
         dispatch(modalAction.handleUserModal(false));
     };
 
-    const handleLogout = () => {
-        const logoutLogic = () => {
-            try {
-                localStorage.removeItem('kakao_access_token');
-                dispatch(modalAction.handleUserModal(false));
-                dispatch(loginAction.handleLogout());
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
-        if (window.Kakao && window.Kakao.Auth) {
-            window.Kakao.Auth.logout(() => {
-                console.log('kakao logout');
-            });
-            logoutLogic();
-            console.log(window.Kakao.Auth.getAccessToken());
+    const handleLogout = async () => {
+        try {
+            await dispatch(kakaoLogoutThunk()).unwrap();
+            dispatch(modalAction.handleUserModal(false));
+        } catch (error) {
+            console.error("로그아웃 실패:", error);
         }
     };
 
     const handleReauthorize = () => {
+        if(userImg) {
+            handleShowAlert(true, '추가 동의 항목이 없습니다.', 'info');
+            return;
+        }
+
         if (window.Kakao && window.Kakao.Auth) {
             const state = 'reauthorize';
 

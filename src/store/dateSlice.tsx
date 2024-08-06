@@ -214,11 +214,11 @@ const dateSlice = createSlice({
             })
         },
         searchToDoEvt: (state, action) => {
-            const keyword = action.payload.replace(/\s/g, '');
+            const keyword = action.payload.replace(/\s/g, '').toLowerCase();
 
             state.searchedToDoList = state.todoList.filter((t) => {
                 if (keyword) {
-                    if (t.title?.replace(/\s/g, '').includes(keyword) || t.description?.replace(/\s/g, '').includes(keyword)) {
+                    if (t.title?.replace(/\s/g, '').toLowerCase().includes(keyword) || t.description?.replace(/\s/g, '').toLowerCase().includes(keyword)) {
                         return t;
                     }
                 }

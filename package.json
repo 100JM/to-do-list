@@ -47,6 +47,7 @@
     "react-leaflet": "^4.2.1",
     "react-redux": "^9.1.2",
     "react-transition-group": "^4.4.5",
+    "to-do-list": "file:",
     "vite-plugin-html": "^3.2.2"
   },
   "devDependencies": {
