@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { modalAction } from './store/modalSlice';
 import { dateAction } from './store/dateSlice';
-import { loginAction, fetchUserInfoThunk, fetchAccessTokenThunk } from './store/loginSlice';
+import { loginAction, fetchUserInfoThunk, fetchAccessTokenThunk, kakaoLogoutThunk } from './store/loginSlice';
 import { useAppDispatch } from './store/hook';
 
 import FullCalendar from '@fullcalendar/react';
@@ -53,7 +53,7 @@ function App() {
   const searchedmyTodoList = useSelector((state: RootState) => state.date.searchedToDoList);
   const importantMyTodoList = useSelector((state: RootState) => state.date.importantEventList);
 
-  const {isLogin, name, profileImage, isLoading, error} = useSelector((state: RootState) => state.login);
+  const { isLogin, name, profileImage, isLoading, error } = useSelector((state: RootState) => state.login);
 
   const calendarHeight: CssDimValue = '92%';
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -87,28 +87,42 @@ function App() {
   const [bottomMenu, setBottomMenu] = useState<string>('calendar');
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    console.log(state);
+    const initLoginCheck = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+      console.log(state);
 
-    const token = localStorage.getItem('kakao_access_token');
+      const token = localStorage.getItem('kakao_access_token');
+      const expiresTime = parseInt(localStorage.getItem('kakao_access_token_expires_in') || '0');
 
-    if (code && state === 'reauthorize') {
-      // fetchAccessToken(code).then(() => {
-      //   urlParams.delete('state');
-      //   urlParams.delete('code');
-      //   window.history.replaceState(null, '', `${window.location.pathname}?${urlParams.toString()}`);
-      //   // handleReauthorize로 리다이렉트 후 url parameter state 삭제
-      // });
-      dispatch(fetchAccessTokenThunk(code));
-    } else {
-      if (token) {
-        console.log('no code');
-        // fetchUserInfo(token);
-        dispatch(fetchUserInfoThunk(token));
+      if (code && state === 'reauthorize') {
+        // 개인정보동의 항목 수정 시 새로운 토큰 발급 후 로그인 유저 정보 가져오기
+        dispatch(fetchAccessTokenThunk(code));
+
+      } else {
+        if (token) {
+          if (Date.now() < expiresTime) {
+            // 카카오 토큰 만료 체크 후 로그인 유저 정보 가져오기
+            dispatch(fetchUserInfoThunk(token));
+
+          } else {
+            // 토큰 만료 시 로그인 유저 정보 체크 후 로그아웃 처리
+            await dispatch(fetchUserInfoThunk(token));
+            
+            try {
+              await dispatch(kakaoLogoutThunk()).unwrap();
+              alert('토큰 만료로 인해 로그아웃 되었습니다.\n다시 로그인 후 이용해주세요.');
+            } catch (error) {
+                console.error("로그아웃 실패:", error);
+            }
+
+          }
+        }
       }
-    }
+    };
+
+    initLoginCheck();
   }, []);
 
   useEffect(() => {
@@ -470,7 +484,7 @@ function App() {
           </>
         }
         <CustomAlert showAlert={showAlert} handleShowAlert={handleShowAlert} />
-        {isUserDialog && <UserDialog handleShowAlert={handleShowAlert}/>}
+        {isUserDialog && <UserDialog handleShowAlert={handleShowAlert} />}
       </section>
     </>
   )

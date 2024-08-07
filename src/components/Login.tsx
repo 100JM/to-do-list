@@ -16,6 +16,9 @@ const Login: React.FC = () => {
         };
 
         localStorage.setItem('kakao_access_token', res.response.access_token);
+        const expiresIn = res.response.expires_in * 1000;
+        const expiresTime = Date.now() + expiresIn;
+        localStorage.setItem('kakao_access_token_expires_in', expiresTime.toString());
 
         dispatch(loginAction.handleLogin(userInfo));
     };

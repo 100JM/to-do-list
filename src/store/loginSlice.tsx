@@ -108,17 +108,30 @@ export const fetchAccessTokenThunk = createAsyncThunk(
 
 export const kakaoLogoutThunk = createAsyncThunk(
     'login/kakaoLogoutThunk',
-    async () => {
+    async (_, { rejectWithValue }) => {
         try {
             if (window.Kakao && window.Kakao.Auth) {
-                window.Kakao.Auth.logout(() => {
-                    localStorage.removeItem('kakao_access_token');
-                    console.log('kakao auth logout');
+                await new Promise<void>((resolve, reject) => {
+                    window.Kakao.Auth.logout((success: boolean) => {
+                        if (success) {
+                            console.log('Kakao auth logout successful');
+                            resolve();
+                        } else {
+                            reject(new Error('Kakao auth logout failed'));
+                        }
+                    });
                 });
+            } else {
+                console.log('Kakao SDK not loaded or not logged in');
             }
         } catch (error) {
-            console.log('kakao auth logout error:', error);
-            throw error;
+            console.error('Kakao auth logout error:', error);
+            return rejectWithValue(error);
+        } finally {
+            // 로그아웃 성공 여부와 관계없이 로컬 스토리지 정리
+            localStorage.removeItem('kakao_access_token');
+            localStorage.removeItem('kakao_access_token_expires_in');
+            console.log('Local storage cleared');
         }
     }
 );
