@@ -75,6 +75,7 @@ interface DateData {
     locationName: string;
     overseaLocationName: string;
     isKorea: boolean;
+    user: any;
 }
 
 interface MapCenterInterface {
@@ -99,6 +100,7 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
     const selectedDateInfo = useSelector((state: RootState) => state.date.selectedDate);
     const selectedDateEvtInfo = useSelector((state: RootState) => state.date.selectedDateEventInfo);
     const selectedDateEvtList = useSelector((state: RootState) => state.date.selectedDateEventList);
+    const userId = useSelector((state: RootState) => state.login.id);
 
     const defaultStartDateTime = dayjs().set('hour', 9).set('minute', 0).startOf('minute').format('HH:mm');
     const defaultEndDateTime = dayjs().set('hour', 18).set('minute', 0).startOf('minute').format('HH:mm');
@@ -151,7 +153,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         overseasLng: (selectedDateEvtInfo.id ? selectedDateEvtInfo.overseasLng : selectedDateInfo.overseasLng),
         locationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.locationName : ''),
         overseaLocationName: (selectedDateEvtInfo.id ? selectedDateEvtInfo.overseaLocationName : ''),
-        isKorea: (selectedDateEvtInfo.id ? selectedDateEvtInfo.isKorea : true)
+        isKorea: (selectedDateEvtInfo.id ? selectedDateEvtInfo.isKorea : true),
+        user: (selectedDateEvtInfo.id ? selectedDateEvtInfo.user : selectedDateInfo.user),
     };
 
     const eventDefaultValue = {
@@ -171,7 +174,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
         overseasLng: 126.9780,
         locationName: '',
         overseaLocationName: '',
-        isKorea: true
+        isKorea: true,
+        user: 0
     }
 
     useEffect(() => {
@@ -362,7 +366,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             overseasLng: (isKorea ? 126.9780 : mapCenter.overseasLng),
             locationName: (isKorea ? selectedAddr : ''),
             overseaLocationName: (isKorea ? '' : selectedAddrOversea),
-            isKorea: isKorea
+            isKorea: isKorea,
+            user: userId
         };
 
         dispatch(dateAction.addNewTodo(newToDo));
@@ -415,7 +420,8 @@ const TodoDialog: React.FC<TodoDialogInterface> = ({
             overseasLng: (isKorea ? 126.9780 : mapCenter.overseasLng),
             locationName: (isKorea ? selectedAddr : ''),
             overseaLocationName: (isKorea ? '' : selectedAddrOversea),
-            isKorea: isKorea
+            isKorea: isKorea,
+            user: userId
         };
 
         dispatch(dateAction.updateTodo(updatedToDo));

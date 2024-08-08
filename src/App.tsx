@@ -49,11 +49,11 @@ function App() {
   const openModal = useSelector((state: RootState) => state.modal.isOpen);
   const isUserDialog = useSelector((state: RootState) => state.modal.isUserDialog);
 
-  const myTodoList = useSelector((state: RootState) => state.date.todoList);
+  const myTodoList = useSelector((state: RootState) => state.date.myTodoList);
   const searchedmyTodoList = useSelector((state: RootState) => state.date.searchedToDoList);
   const importantMyTodoList = useSelector((state: RootState) => state.date.importantEventList);
 
-  const { isLogin, name, profileImage, isLoading, error } = useSelector((state: RootState) => state.login);
+  const { isLogin, id, name, profileImage, isLoading, error } = useSelector((state: RootState) => state.login);
 
   const calendarHeight: CssDimValue = '92%';
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -75,7 +75,8 @@ function App() {
     overseasLng: 126.9780,
     locationName: '',
     overseaLocationName: '',
-    isKorea: true
+    isKorea: true,
+    user: 0,
   }
 
   const [showAlert, setShowAlert] = useState<CustomAlertInterface>({
@@ -153,6 +154,7 @@ function App() {
     }
 
     dispatch(dateAction.getImportantTodoList());
+
   }, [myTodoList, showSearchForm]);
 
   const handleBottomMenuChange = (event: React.SyntheticEvent, newValue: string) => {

@@ -20,6 +20,7 @@ interface SelectedDateInterface {
     locationName: string;
     overseaLocationName: string;
     isKorea: boolean;
+    user: any;
 };
 
 interface SelectedDateEvtInferface {
@@ -41,6 +42,7 @@ type DateState = {
     selectedDateEventInfo: SelectedDateInterface;
     selectedDateEventList: Array<any>;
     todoList: Array<any>;
+    myTodoList: Array<any>;
     searchedToDoList: Array<any>;
     importantEventList: Array<any>;
 };
@@ -65,7 +67,8 @@ const initDateState: DateState = {
         overseasLng: 126.9780,
         locationName: '',
         overseaLocationName: '',
-        isKorea: true
+        isKorea: true,
+        user: 0,
     },
     selectedDateEventInfo: {
         id: '',
@@ -84,7 +87,8 @@ const initDateState: DateState = {
         overseasLng: 126.9780,
         locationName: '',
         overseaLocationName: '',
-        isKorea: true
+        isKorea: true,
+        user: 0,
     },
     selectedDateEventList: [],
     todoList: [
@@ -104,7 +108,8 @@ const initDateState: DateState = {
             overseasLng: 126.9780,
             locationName: '',
             overseaLocationName: '',
-            isKorea: true
+            isKorea: true,
+            user: 3643699604,
         },
         {
             id: '2fds',
@@ -123,7 +128,8 @@ const initDateState: DateState = {
             overseasLng: 126.9780,
             locationName: '',
             overseaLocationName: '',
-            isKorea: true
+            isKorea: true,
+            user: 3643699604,
         },
         {
             id: '3a',
@@ -142,7 +148,8 @@ const initDateState: DateState = {
             overseasLng: 126.9780,
             locationName: '',
             overseaLocationName: '',
-            isKorea: true
+            isKorea: true,
+            user: 123,
         },
         {
             id: '4',
@@ -160,9 +167,11 @@ const initDateState: DateState = {
             overseasLng: 109.1899018,
             locationName: '',
             overseaLocationName: '냐짱, 베트남 칸호아 냐짱',
-            isKorea: false
+            isKorea: false,
+            user: 3643699604,
         }
     ],
+    myTodoList: [],
     searchedToDoList: [],
     importantEventList: [],
 };
@@ -189,7 +198,8 @@ const dateSlice = createSlice({
                 overseasLng: 126.9780,
                 locationName: '',
                 overseaLocationName: '',
-                isKorea: true
+                isKorea: true,
+                user: 0,
             }
         },
         dateClickEvt: (state, action: PayloadAction<DateClickInterface>) => {
@@ -253,7 +263,10 @@ const dateSlice = createSlice({
         },
         setSelectedEventInfoDefault: (state, action: PayloadAction<SelectedDateInterface>) => {
             state.selectedDateEventInfo = action.payload;
-        }
+        },
+        getMyTodoList: (state, action) => {
+            console.log(action.payload);
+        },
     },
 });
 
