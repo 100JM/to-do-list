@@ -219,14 +219,14 @@ const dateSlice = createSlice({
             state.selectedDate.end = action.payload.dateStr;
         },
         getSelectedEventInfo: (state, action) => {
-            state.selectedDateEventInfo = state.todoList.find((t) => {
+            state.selectedDateEventInfo = state.myTodoList.find((t) => {
                 return t.id === action.payload;
             })
         },
         searchToDoEvt: (state, action) => {
             const keyword = action.payload.replace(/\s/g, '').toLowerCase();
 
-            state.searchedToDoList = state.todoList.filter((t) => {
+            state.searchedToDoList = state.myTodoList.filter((t) => {
                 if (keyword) {
                     if (t.title?.replace(/\s/g, '').toLowerCase().includes(keyword) || t.description?.replace(/\s/g, '').toLowerCase().includes(keyword)) {
                         return t;
@@ -235,7 +235,7 @@ const dateSlice = createSlice({
             }).sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
         },
         getImportantTodoList: (state) => {
-            state.importantEventList = state.todoList.filter((t) => {
+            state.importantEventList = state.myTodoList.filter((t) => {
                 return t.important === true;
             }).sort((a, b) => {
                 const dateA = new Date(a.end.split('T')[0]);
@@ -245,10 +245,10 @@ const dateSlice = createSlice({
             });
         },
         addNewTodo: (state, action: PayloadAction<object>) => {
-            state.todoList.push(action.payload);
+            state.myTodoList.push(action.payload);
         },
         updateTodo: (state, action: PayloadAction<SelectedDateInterface>) => {
-            state.todoList = state.todoList.map((i) => {
+            state.myTodoList = state.myTodoList.map((i) => {
                 if (i.id === action.payload.id) {
                     return action.payload;
                 }
@@ -257,7 +257,7 @@ const dateSlice = createSlice({
             })
         },
         deleteTodo: (state, action) => {
-            state.todoList = state.todoList.filter((t) => {
+            state.myTodoList = state.myTodoList.filter((t) => {
                 return t.id !== action.payload;
             });
         },
@@ -265,7 +265,9 @@ const dateSlice = createSlice({
             state.selectedDateEventInfo = action.payload;
         },
         getMyTodoList: (state, action) => {
-            console.log(action.payload);
+            state.myTodoList = state.todoList.filter((t) => {
+                return t.user === action.payload;
+            });
         },
     },
 });

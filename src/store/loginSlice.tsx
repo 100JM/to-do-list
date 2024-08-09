@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { modalAction } from "./modalSlice";
+import { dateAction } from "./dateSlice";
 
 interface LoginState {
     isLogin: boolean;
@@ -36,7 +37,7 @@ const initLoginState: LoginState = {
 
 export const fetchUserInfoThunk = createAsyncThunk<handleLogin, string>(
     'login/fetchUserInfoThunk',
-    async (token: string, { rejectWithValue }) => {
+    async (token: string, { dispatch, rejectWithValue }) => {
         try {
             localStorage.setItem('kakao_access_token', token);
             window.Kakao.Auth.setAccessToken(token);
@@ -44,7 +45,9 @@ export const fetchUserInfoThunk = createAsyncThunk<handleLogin, string>(
             const response = await window.Kakao.API.request({
                 url: '/v2/user/me'
             });
-
+            
+            dispatch(dateAction.getMyTodoList(response.id));
+            
             return {
                 id: response.id,
                 name: response.properties.nickname,
@@ -92,6 +95,8 @@ export const fetchAccessTokenThunk = createAsyncThunk(
             const userResponse = await window.Kakao.API.request({
                 url: '/v2/user/me'
             });
+
+            dispatch(dateAction.getMyTodoList(userResponse.id));
 
             // 4. 사용자 정보 반환
             return {

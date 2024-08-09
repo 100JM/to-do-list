@@ -4,6 +4,7 @@ import { loginAction } from '../store/loginSlice';
 import KakaoLogin from 'react-kakao-login';
 
 import kakaoLoginImg from '../assets/kakao_login_large_narrow.png';
+import { dateAction } from '../store/dateSlice';
 
 const Login: React.FC = () => {
     const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const Login: React.FC = () => {
         localStorage.setItem('kakao_access_token_expires_in', expiresTime.toString());
 
         dispatch(loginAction.handleLogin(userInfo));
+        dispatch(dateAction.getMyTodoList(userInfo.id));
     };
 
     return (
