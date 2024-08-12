@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { modalAction } from './store/modalSlice';
 import { dateAction } from './store/dateSlice';
-import { loginAction, fetchUserInfoThunk, fetchAccessTokenThunk, kakaoLogoutThunk } from './store/loginSlice';
+import { fetchUserInfoThunk, fetchAccessTokenThunk, kakaoLogoutThunk } from './store/loginSlice';
 import { useAppDispatch } from './store/hook';
 
 import FullCalendar from '@fullcalendar/react';
@@ -23,6 +23,7 @@ import TodoDialog from './components/TaskDialog';
 import CustomAlert from './components/CustomAlert';
 import Login from './components/Login';
 import UserDialog from './components/UserDialog';
+import AllTodoList from './components/AllTodoList';
 // import KakaoAddrSearchForm from './components/KakaoAddrSearchForm';
 
 import Box from '@mui/material/Box';
@@ -32,6 +33,7 @@ import Badge from '@mui/material/Badge';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PushPinIcon from '@mui/icons-material/PushPin';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
@@ -292,6 +294,10 @@ function App() {
                       />
                     }
                     {
+                      bottomMenu === 'all' &&
+                      <AllTodoList searchResultClickEvt={searchResultClickEvt}/>
+                    }
+                    {
                       bottomMenu === 'importantTodo' &&
                       <>
                         <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
@@ -365,6 +371,7 @@ function App() {
                     >
                       <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
                       <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
+                      <SpeedDialAction key="all" icon={<FormatListBulletedIcon />} tooltipTitle="모든 일정" onClick={() => desktopMenuEvt('all')} />
                       <SpeedDialAction
                         key="importantTodo"
                         icon={
@@ -410,6 +417,7 @@ function App() {
                       >
                         <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
                         <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
+                        <BottomNavigationAction label="모든 일정" value="all" icon={<FormatListBulletedIcon />} />
                         <BottomNavigationAction
                           label="중요 일정"
                           value="importantTodo"

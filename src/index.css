@@ -6,6 +6,10 @@ html, body, #root {
   overflow: hidden;
 }
 
+i {
+  font-style: normal;
+}
+
 .fc {
   height: 92%;
 }

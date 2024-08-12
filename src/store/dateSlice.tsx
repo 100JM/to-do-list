@@ -119,7 +119,7 @@ const initDateState: DateState = {
             color: '#3788d8',
             colorName: '워터블루',
             allDay: false,
-            important: true,
+            important: false,
             description: '테스트입니다.',
             display: "block",
             koreaLat: 37.5665,
