@@ -3,8 +3,8 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faPalette } from "@fortawesome/free-solid-svg-icons"
 
 interface ColorListInterFace {
-    className:string,
-    colorName:string
+    className:string;
+    colorName:string;
 }
 
 // color 값으로 변경

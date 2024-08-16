@@ -1,22 +1,161 @@
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import dayjs from 'dayjs';
 
 interface AllTodoListInterface {
-    searchResultClickEvt: (id:string) => void;
+    searchResultClickEvt: (id: string) => void;
 }
+
+interface FilterListInterface {
+    name: string;
+    value: string;
+}
+
+const FILTER_LIST: FilterListInterface[] = [
+    {
+        name: '전체',
+        value: 'all'
+    },
+    {
+        name: '종료 일정',
+        value: 'end'
+    },
+    {
+        name: '진행 일정',
+        value: 'ongoing'
+    },
+    {
+        name: '국내 일정',
+        value: 'korea'
+    },
+    {
+        name: '해외 일정',
+        value: 'oversea'
+    },
+];
 
 const AllTodoList: React.FC<AllTodoListInterface> = ({ searchResultClickEvt }) => {
     const myTodoList = useSelector((state: RootState) => state.date.myTodoList);
 
+    const [filter, setFilter] = useState<Array<any>>(FILTER_LIST.map(f => f.value));
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [todoList, setTodolist] = useState<Array<any>>(myTodoList);
+
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleCheck = (value: string, isChecked: boolean) => {
+        if (value === 'all') {
+            setFilter(isChecked ? FILTER_LIST.map(f => f.value) : []);
+        } else {
+            setFilter((prevFilter) => {
+                const newFilter = isChecked
+                    ? [...prevFilter, value]
+                    : prevFilter.filter(f => f !== value);
+
+                if (newFilter.length === FILTER_LIST.length - 1 && !newFilter.includes('all')) {
+                    return [...newFilter, 'all'];
+                }
+
+                if (newFilter.includes('all') && !isChecked) {
+                    return newFilter.filter(f => f !== 'all');
+                }
+
+                return newFilter;
+            });
+        }
+    };
+
+    // useEffect(() => {
+    //     if (filter.length === 0) {
+    //         setTodolist([]);
+    //     } else {
+    //         if (filter.includes('all')) {
+    //             setTodolist(myTodoList);
+    //         } else {
+
+    //         }
+    //     }
+
+    //     console.log(filter);
+    // }, [filter]);
+
     return (
         <>
-            <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">모든 일정</span></div>
+            <div className="w-full h-10 flex items-center pb-2 relative">
+                <span className="absolute left-1/2 transform -translate-x-1/2 text-lg">일정 목록</span>
+                <div className="ml-auto">
+                    <Button
+                        id="basic-button"
+                        aria-controls={open ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        onClick={handleClick}
+                        style={{
+                            backgroundColor: "#1976d2",
+                            color: "#fff",
+                            padding: "2px",
+                            minWidth: "48px"
+                        }}
+                    >
+                        필터
+                    </Button>
+                    <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                        }}
+                        sx={{
+                            "& ul": { padding: "2px" }
+                        }}
+                    >
+                        {
+                            FILTER_LIST.map((f) => {
+                                return (
+                                    <li className="p-1" key={f.value}>
+                                        <FormControlLabel
+                                            style={{ margin: 0 }}
+                                            sx={{
+                                                "& span": { fontSize: "14px" }
+                                            }}
+                                            control={
+                                                <Checkbox
+                                                    style={{ padding: 0 }}
+                                                    checked={filter.includes(f.value)}
+                                                    value={f.value}
+                                                    onChange={(e) => handleCheck(e.target.value, e.target.checked)}
+                                                />
+                                            }
+                                            label={f.name}
+                                        />
+                                    </li>
+                                );
+                            })
+                        }
+                    </Menu>
+                </div>
+            </div>
             <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
                 {
-                    (myTodoList.length > 0) ?
-                        myTodoList.map((i) => {
+                    (todoList.length > 0) ?
+                        todoList.map((i) => {
                             const importantEndDate: string = i.allDay ? dayjs(i.end).add(-1, 'day').format('YYYY-MM-DD') : i.end.split('T')[0];
                             const importantEndDday: number = dayjs(importantEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
 
@@ -30,7 +169,7 @@ const AllTodoList: React.FC<AllTodoListInterface> = ({ searchResultClickEvt }) =
                                             {
                                                 i.important &&
                                                 <div>
-                                                    <i className="bi bi-pin-fill" style={{color: `${i.color}`}}></i>
+                                                    <i className="bi bi-pin-fill" style={{ color: `${i.color}` }}></i>
                                                     <span>중요 일정</span>
                                                 </div>
                                             }

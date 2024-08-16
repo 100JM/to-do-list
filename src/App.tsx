@@ -300,7 +300,7 @@ function App() {
                     {
                       bottomMenu === 'importantTodo' &&
                       <>
-                        <div className="w-full h-10 flex items-center pb-2"><span className="text-center flex-grow text-lg">중요 일정</span></div>
+                        <div className="w-full h-10 flex items-center justify-center pb-2"><span className="text-center text-lg">중요 일정</span></div>
                         <div style={{ width: "100%", height: "calc(92% - 2.5rem)", overflowY: "auto" }}>
                           {
                             (importantMyTodoList.length > 0) ?
@@ -371,7 +371,7 @@ function App() {
                     >
                       <SpeedDialAction key="calendar" icon={<CalendarMonthIcon />} tooltipTitle="캘린더" onClick={() => desktopMenuEvt('calendar')} />
                       <SpeedDialAction key="todo" icon={<AddCircleOutlineIcon />} tooltipTitle="일정 추가" onClick={todoButtonEvt} />
-                      <SpeedDialAction key="all" icon={<FormatListBulletedIcon />} tooltipTitle="모든 일정" onClick={() => desktopMenuEvt('all')} />
+                      <SpeedDialAction key="all" icon={<FormatListBulletedIcon />} tooltipTitle="일정 목록" onClick={() => desktopMenuEvt('all')} />
                       <SpeedDialAction
                         key="importantTodo"
                         icon={
@@ -417,7 +417,7 @@ function App() {
                       >
                         <BottomNavigationAction label="캘린더" value="calendar" icon={<CalendarMonthIcon />} />
                         <BottomNavigationAction label="일정 작성" value="todo" icon={<AddCircleOutlineIcon />} sx={{ color: "#DC143C !important" }} onClick={todoButtonEvt} />
-                        <BottomNavigationAction label="모든 일정" value="all" icon={<FormatListBulletedIcon />} />
+                        <BottomNavigationAction label="일정 목록" value="all" icon={<FormatListBulletedIcon />} />
                         <BottomNavigationAction
                           label="중요 일정"
                           value="importantTodo"
@@ -449,9 +449,9 @@ function App() {
                   unmountOnExit
                 >
                   <div className="h-full w-full p-4">
-                    <div className="w-full h-10 flex items-center justify-between pb-2">
-                      <ArrowBackIcon onClick={() => searchButtonClickEvt(false)} sx={{ cursor: "pointer" }} />
-                      <span className="text-center flex-grow mr-6 text-lg">검색</span>
+                    <div className="w-full h-10 flex items-center pb-2 relative">
+                      <ArrowBackIcon onClick={() => searchButtonClickEvt(false)} sx={{ cursor: "pointer", marginRight: "auto" }} />
+                      <span className="absolute left-1/2 transform -translate-x-1/2 text-lg">검색</span>
                     </div>
                     <div className="w-full h-10 border rounded-md p-1 border-gray-400 flex items-center justify-center mb-3">
                       <SearchIcon />
