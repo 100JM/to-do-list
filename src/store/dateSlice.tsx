@@ -95,8 +95,8 @@ const initDateState: DateState = {
         {
             id: '1',
             title: 'Aevent',
-            start: '2024-06-14T09:00',
-            end: '2024-06-15T18:00',
+            start: '2024-08-17T09:00',
+            end: '2024-08-21T18:00',
             color: '#3788d8',
             colorName: '워터블루',
             allDay: false,

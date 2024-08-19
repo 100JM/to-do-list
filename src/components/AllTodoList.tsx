@@ -31,14 +31,6 @@ const FILTER_LIST: FilterListInterface[] = [
         name: '진행 일정',
         value: 'ongoing'
     },
-    {
-        name: '국내 일정',
-        value: 'korea'
-    },
-    {
-        name: '해외 일정',
-        value: 'oversea'
-    },
 ];
 
 const AllTodoList: React.FC<AllTodoListInterface> = ({ searchResultClickEvt }) => {
@@ -80,19 +72,28 @@ const AllTodoList: React.FC<AllTodoListInterface> = ({ searchResultClickEvt }) =
         }
     };
 
-    // useEffect(() => {
-    //     if (filter.length === 0) {
-    //         setTodolist([]);
-    //     } else {
-    //         if (filter.includes('all')) {
-    //             setTodolist(myTodoList);
-    //         } else {
+    useEffect(() => {
+        const filteredList = myTodoList.filter((todo) => {
+            const isEndDate = todo.allDay ? dayjs(todo.end).add(-1, 'day').format('YYYY-MM-DD') : todo.end.split('T')[0];
+            const isOngoing = dayjs(isEndDate).startOf('day').diff(dayjs().startOf('day'), 'day');
 
-    //         }
-    //     }
+            if (filter.includes('all')) {
+                return true;
+            }
 
-    //     console.log(filter);
-    // }, [filter]);
+            if (filter.includes('end') && isOngoing < 0) {
+                return true;
+            }
+
+            if (filter.includes('ongoing') && isOngoing >= 0) {
+                return true;
+            }
+
+            return false;
+        });
+
+        setTodolist(filteredList);
+    }, [filter, myTodoList]);
 
     return (
         <>
