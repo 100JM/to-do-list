@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // sans: ['IBM Plex Sans KR', 'sans-serif']
-        sans: ['Gmarket Sans', 'sans-serif']
+        sans: ['IBM Plex Sans KR', 'sans-serif']
+        // sans: ['Gmarket Sans', 'sans-serif']
       },
     },
   },
