@@ -15,7 +15,7 @@ import koLocale from '@fullcalendar/core/locales/ko';
 
 import dayjs from 'dayjs';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { CSSTransition } from 'react-transition-group';
+// import { CSSTransition } from 'react-transition-group';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -130,6 +130,7 @@ function App() {
     };
 
     initLoginCheck();
+
   }, []);
 
   useEffect(() => {
@@ -237,19 +238,34 @@ function App() {
     setBottomMenu(value);
   };
 
+  const fadeVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
+
   const slideVariants = {
-    hidden: (direction: any) => ({
-      x: direction > 0 ? 300 : -300, // 슬라이드 방향
-      opacity: 0,
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: any) => ({
-      x: direction > 0 ? -300 : 300,
-      opacity: 0,
-    }),
+    hidden: { x: '-100%', opacity: 0 },
+    visible: { x: '0%', opacity: 1 },
+    exit: { x: '-100%', opacity: 0 },
+  };
+
+  const subVariants = {
+    hidden: { x: '100%', opacity: 0 },
+    visible: { x: '0%', opacity: 1 },
+    exit: { x: '100%', opacity: 0 },
+  };
+
+  const fadeTransitionSettings = {
+    duration: 0.8,
+    ease: "easeInOut"
+  };
+
+  const transitionSettings = {
+    type: "spring",
+    damping: 15,
+    stiffness: 60,
+    duration: 0.5
   };
 
   return (
@@ -268,26 +284,41 @@ function App() {
       }
       {isLoading !== 'pending' &&
         <>
-          {!isLogin &&
-            <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
-              <div className="w-full h-1/2 flex justify-center items-center p-4 ">
-                <div className="w-full h-full flex justify-center items-center text-4xl pacifico-regular">TO DO LIST</div>
-              </div>
-              <Login />
-            </section>
-          }
+          <AnimatePresence>
+            {!isLogin &&
+              <motion.div
+              key="login"
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={fadeTransitionSettings}
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "absolute"
+              }}
+              >
+                <section className="fixed top-0 left-0 right-0 bottom-0 p-4 text-sm font-sans">
+                  <div className="w-full h-1/2 flex justify-center items-center p-4 ">
+                    <div className="w-full h-full flex justify-center items-center text-4xl pacifico-regular">TO DO LIST</div>
+                  </div>
+                  <Login />
+                </section>
+              </motion.div>
+            }
+          </AnimatePresence>
           {isLogin &&
             <>
-              <AnimatePresence custom={!showSearchForm ? 1 : -1}>
+              <AnimatePresence>
                 {!showSearchForm &&
                   <motion.div
-                    key="componentA"
-                    custom={1} // 애니메이션 방향 설정
+                    key="calendar"
                     variants={slideVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    transition={{ duration: 0.5 }}
+                    transition={transitionSettings}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -475,13 +506,12 @@ function App() {
                 }
                 {showSearchForm &&
                   <motion.div
-                    key="componentB"
-                    custom={-1} // 애니메이션 방향 설정
-                    variants={slideVariants}
+                    key="searchForm"
+                    variants={subVariants}
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    transition={{ duration: 0.5 }}
+                    transition={transitionSettings}
                     style={{
                       width: "100%",
                       height: "100%",
